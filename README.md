@@ -20,7 +20,7 @@ To use it, you'll need :
 It makes use of TranslucentTB and PowerToys to automate the Taskbar colour changing process. The Taskbar Blur Levels and Blur Style can be changed from TranslucentTB itself.
 
 
-
+<br/>
 
 **HOW DID WE GET HERE?**
 
