@@ -22,7 +22,7 @@ It makes use of TranslucentTB and PowerToys to automate the Taskbar colour chang
 
 <br/>
 
-**HOW DID WE GET HERE?**
+## **HOW DID WE GET HERE?**
 
 
 Because TranslucentTB has it's limitations.
@@ -47,7 +47,7 @@ Because TranslucentTB has it's limitations.
   
   
   
-  **BUT THERE ARE NO SHORTCUTS IN LIFE!**
+  ## **BUT THERE ARE NO SHORTCUTS IN LIFE!**
   
   Well, there are, when you're dealing with computers. Here's what "Colours" does
   
