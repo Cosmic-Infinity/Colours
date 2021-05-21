@@ -7,7 +7,7 @@ Now customise your Windows 10 task bar colours and looks with this little tool.
 😜. Like the Windows 10 fluent Design? that's an option too.<br/>
  :heart_eyes:. And the best part? It's Colourful and Automated.<br/>
 
-_It's all about that coutomisation. It's all about you! Welcome to Colours!_
+_It's all about that customisation. It's all about you! Welcome to Colours!_
 
 
 NOTE : This is just an automation tool and the functionality it provides can be done by hand as well, although, that's time taking and slow.
