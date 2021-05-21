@@ -44,7 +44,7 @@ Because TranslucentTB has it's limitations.
   _**This is exactly what "Colours" tries to automate**_
   
   
-  
+  <br/>
   
   
   ## **BUT THERE ARE NO SHORTCUTS IN LIFE!**
