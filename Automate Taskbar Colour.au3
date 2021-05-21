@@ -1,5 +1,6 @@
 #include <MsgBoxConstants.au3> ;message box library
 #include <AutoItConstants.au3> ;MouseClick library
+;#AutoIt3Wrapper_icon="C:\Users\%username%\Desktop\Colours Icon85.ico"
 
 
 PickColour()
@@ -38,7 +39,7 @@ Func PickColour()
 
 	  ;start power toys if off
 	  If Not ProcessExists("PowerToys.exe") Then
-		 Run("C:\Program Files\PowerToys\PowerToys.exe")
+		 Run("%programfiles%\PowerToys\PowerToys.exe")
 		 ProcessWait("PowerToys.exe")
 	  EndIf
 
@@ -70,7 +71,7 @@ Func ApplyColour()
 
 	;changing key press delay momentarily
     opt("SendKeyDelay",1)
-    Send("C:\Users\%username%\AppData\Roaming\TranslucentTB\config.cfg{ENTER}")
+    Send("%UserProfile%\AppData\Roaming\TranslucentTB\config.cfg{ENTER}")
     opt("SendKeyDelay",5)
 
     ;move cursor to location
