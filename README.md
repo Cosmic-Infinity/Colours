@@ -39,7 +39,7 @@ Because TranslucentTB has it's limitations.
   For doing so with TranslucentTB you'll have to manually look for a colour of your choice/choose from windows perssonalization colour palette, THEN find the HEX value of that colour _(good luck finding hex of a random colour on screen XD)_, and THEN manually input that in every colour field of the TranslucentTB config file.
   
  <img width="328" alt="Annotation 2021-05-21 230624" src="https://user-images.githubusercontent.com/64971616/119176830-2f31a280-ba89-11eb-924f-fdb5144aa836.png">
-  Doing that is another huge waste of timme. Whereby you'll first
+  Doing that is another huge waste of time.
   
   _**This is exactly what "Colours" tries to automate**_
   
