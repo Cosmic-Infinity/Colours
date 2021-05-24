@@ -9,6 +9,8 @@ Now customise your Windows 10 task bar colours and looks with this little tool.
 
 ### _It's all about that customisation. It's all about you! Welcome to Colours!_
 
+<br/>
+
 
 NOTE : This is just an automation tool and the functionality it provides can be done by hand as well, although, that's time taking and slow.
 
