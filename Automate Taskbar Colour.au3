@@ -1,10 +1,14 @@
 #include <MsgBoxConstants.au3> ;message box library
 #include <AutoItConstants.au3> ;MouseClick library
+#include <ScreenCapture.au3> ;Screenshot Library
+#include <GDIPlus.au3> ; ImageProcessing Library
+#include <File.au3> ; temporary file name generation library
+
 ;#AutoIt3Wrapper_icon="C:\Users\%username%\Desktop\Colours Icon85.ico"
 
-
+Global $colour=""
 PickColour()
-ApplyColour()
+ApplyColour($colour)
 
 
 Func PickColour()
@@ -13,7 +17,12 @@ Func PickColour()
 
 
 	; #r is win+run, rest is application and enter key
-	Send("#r ms-settings:colors{ENTER}")
+	; not waiting for "Run" to open caused it to miss some keystrokes. sleep will help with that
+	Send("#r")
+	Sleep(500)
+	Send("ms-settings:colors{ENTER}")
+	Opt("SendKeyDelay", 1)
+
 
     ;wait for settings to start by checking visible text on the window is 'Settings'
 	  While 1
@@ -36,28 +45,50 @@ Func PickColour()
 
 	;move mouse upto the colour
     MouseMove(370, 590, 0)
+    Sleep(200)
 
-	  ;start power toys if off
-	  If Not ProcessExists("PowerToys.exe") Then
-		 Run("%programfiles%\PowerToys\PowerToys.exe")
-		 ProcessWait("PowerToys.exe")
-	  EndIf
 
-	  ;sent WIN+SHIFT+C
-	  Send("#+c")
-	  Sleep(500)
-	  MouseClick($MOUSE_CLICK_PRIMARY)
+	;Setting window to DPI Aware
+	DllCall("User32.dll","bool","SetProcessDPIAware")
 
-	  ;close settings
-	  WinClose("Settings")
-	  ;close PowerToys
-	  ProcessClose("PowerToys.exe")
-	  ProcessWaitClose("PowerToys.exe")
+    ;taking focus away from settings as windows prevents screenshots of settings
+	WinActivate("Program Manager")
+
+	Local $sTempFile = _TempFile(@TempDir,"\" & "colour_Sample_", ".jpg", 3)
+
+    ;getting mouse position and taking a screenshot
+	$pos = MouseGetPos()
+	_ScreenCapture_Capture($sTempFile, $pos[0] - 25, $pos[1] - 25, $pos[0] + 25, $pos[1] + 25)
+
+	;Getting Colour Value from the screenshot's 10*10 position
+	$iPosX = 12
+	$iPosY = 12
+	_GDIPlus_Startup()
+	$hImage = _GDIPlus_ImageLoadFromFile($sTempFile)
+	 $colour = Hex(_GDIPlus_BitmapGetPixel($hImage, $iPosX, $iPosY), 6)
+	 	;ShellExecute($sTempFile)
+		;MsgBox(0, "Pixel Color", $colour)
+	_GDIPlus_ImageDispose($hImage)
+	_GDIPlus_ShutDown()
+
+
+	;delete file once done
+	Local $iDelete = FileDelete($sTempFile)
+		;Display a message of whether the file was deleted.
+		;If $iDelete Then
+		  ;MsgBox($MB_SYSTEMMODAL, "", "The file was successfuly deleted.")
+			 ;Else
+		   ;MsgBox($MB_SYSTEMMODAL, "", "An error occurred whilst deleting the file.")
+		;EndIf
+
+		 ProcessClose("SystemSettings.exe")
+		 ProcessWaitClose("SystemSettings.exe")
 
 EndFunc
 
 
-Func ApplyColour()
+
+Func ApplyColour($applying)
 
     ;start notepad
     Run("Notepad.exe")
@@ -70,7 +101,7 @@ Func ApplyColour()
     WinWaitActive("Open")
 
 	;changing key press delay momentarily
-    opt("SendKeyDelay",1)
+    opt("SendKeyDelay",3)
     Send("%UserProfile%\AppData\Roaming\TranslucentTB\config.cfg{ENTER}")
     opt("SendKeyDelay",5)
 
@@ -81,10 +112,10 @@ Func ApplyColour()
     Send("+{RIGHT 6}")
 
     ;open replace window , fill 'replace with' box
-    Send("^h{TAB}^v")
+    Send("^h{TAB}" & $applying)
 
-    ;go back 6 steps and remove #, reach 'replace all' button
-    Send("{LEFT 6}{BACKSPACE}{TAB 5}")
+    ;reach 'replace all' button
+    Send("{TAB 5}")
 
     ;press enter
     Send("{ENTER}")
@@ -103,10 +134,15 @@ Func ApplyColour()
     Send("^s")
     Sleep(500)
 
-	;close Notepad
+	;close Notepad and wait for it to close
     Send("!{F4}")
+	ProcessWaitClose("Notepad.exe")
 
     ;start translucentTB again
-    Run("C:\Program Files (x86)\TranslucentTB\TranslucentTB.exe")
+	  Send("#r")
+	  Sleep(500)
+	  	Opt("SendKeyDelay", 1)
+	Send("%programfiles(x86)%\TranslucentTB\TranslucentTB.exe{ENTER}")
+	ProcessWait("TranslucentTB.exe")
 
 EndFunc
