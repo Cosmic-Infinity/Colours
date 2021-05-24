@@ -15,9 +15,8 @@ NOTE : This is just an automation tool and the functionality it provides can be 
 To use it, you'll need :
 
 1. **TranslucentTB** by _Charles Milette_ (https://github.com/TranslucentTB/TranslucentTB/releases/latest)
-2. **PowerToys** by _Microsoft_ (https://github.com/microsoft/PowerToys/releases/latest)
 
-It makes use of TranslucentTB and PowerToys to automate the Taskbar colour changing process. The Taskbar Blur Levels and Blur Style can be changed from TranslucentTB itself.
+The Taskbar Blur Levels and Blur Style can be changed from TranslucentTB itself.
 
 
 <br/>
@@ -51,12 +50,11 @@ Because TranslucentTB has it's limitations.
   
   Well, there are, when you're dealing with computers. Here's what "Colours" does
   
-  ◦ Launch Windows Personalisation and choose the Color Windows 'thinks' fits wallpaper you've currently set. _**MAKE SURE THE "Automatically pick an accent colour from my background" IS ON OTHERWISE COLOURS WON'T CHANGE AUTOMATICALLY_**
+  ◦ Opens settings and checks for windows recommended colour for current wallpaper.
   
+  ◦ Takes the HEX of that colour.
   
-  ◦ Use PowerToys' System Wide colour picker to find the HEX of that colour.
-  
-  ◦ Open the TranslucentTB confi file and replaces the colour values so that the new colour is refected.
+  ◦ Open the TranslucentTB config file and replaces the colour values so that the new colour is refected.
   
   ◦ Restart TranslucentTB for changes to take effect.
 
