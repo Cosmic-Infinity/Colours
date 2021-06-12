@@ -1009,5 +1009,3 @@ Func main()
 
 	Until $n = $GUI_EVENT_CLOSE
 EndFunc   ;==>main
-
-
