@@ -40,7 +40,7 @@ Because TranslucentTB has it's limitations.
   For doing so with TranslucentTB you'll have to manually look for a colour of your choice/choose from windows perssonalization colour palette, THEN find the HEX value of that colour _(good luck finding hex of a random colour on screen XD)_, and THEN manually input that in every colour field of the TranslucentTB config file.
   
  <img width="328" alt="Annotation 2021-05-21 230624" src="https://user-images.githubusercontent.com/64971616/119176830-2f31a280-ba89-11eb-924f-fdb5144aa836.png">
-  Doing that is another huge waste of time.
+  Doing that is a huge waste of time.
   
   _**This is exactly what "Colours" tries to automate**_
   
@@ -59,4 +59,16 @@ Because TranslucentTB has it's limitations.
   ◦ Open the TranslucentTB config file and replaces the colour values so that the new colour is refected.
   
   ◦ Restart TranslucentTB for changes to take effect.
-
+  
+  
+  <br/>
+  <br/>
+  ## Regarding Safety and flagging
+    
+ I'm still very new to application developement, and because of my bad programming skills, some security checks might trip here and there. Like :
+ 
+ ‣ Chrome flagging Colours as unsafe. I think it's because of lack of signature or something on my application. I'm still figuring this out and it should get fixed in the future.
+ ‣ Windows flagging it as unsafe to run. Again, due to lack of signature.
+ 
+ I'm still learning to avoid bad programming practices. I'm afraid till then even some antiviruses might flag it. I an assure you of safety, but you don't have to take my word for it. Feel free to review and compile the code yourself! 🙂 
+ Speaking of...
