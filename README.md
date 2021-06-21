@@ -63,12 +63,27 @@ Because TranslucentTB has it's limitations.
   
   <br/>
   <br/>
-  ## Regarding Safety and flagging
+  
+  ## _Regarding Safety and flagging_
     
  I'm still very new to application developement, and because of my bad programming skills, some security checks might trip here and there. Like :
  
- ‣ Chrome flagging Colours as unsafe. I think it's because of lack of signature or something on my application. I'm still figuring this out and it should get fixed in the future.
- ‣ Windows flagging it as unsafe to run. Again, due to lack of signature.
+   ‣  Chrome flagging Colours as unsafe. I think it's because of lack of signature or something on my application. I'm still figuring this out and it should get fixed in the future.
  
- I'm still learning to avoid bad programming practices. I'm afraid till then even some antiviruses might flag it. I an assure you of safety, but you don't have to take my word for it. Feel free to review and compile the code yourself! 🙂 
+   ‣  Windows flagging it as unsafe to run. Again, due to lack of signature.
+ 
+ I'm still learning to avoid bad programming practices. I'm afraid till then even some antiviruses might flag it. I can assure you of safety, but you don't have to take my word for it. Feel free to review and compile the code yourself! 🙂 
  Speaking of...
+ 
+ <br/>
+ 
+ ## _Compiling it youself_
+ Autoit code is relatively easy to compile. All you need is the autoit compiler which comes with the autoit package. You can get autoit from : https://www.autoitscript.com/
+ 
+1. `Download` the required file from this repository. (either GUI or Non-GUI version)
+2. `Download` and `Install` Autoit
+3. Open `Compile Script to .exe (x64)` (reccomended) or `Compile Script to .exe (x86)`
+4. `Select` the script file which you want to convert to .exe
+5. `Select` an icon (optional)
+6. Click `Convert`
+7. Enjoy!
