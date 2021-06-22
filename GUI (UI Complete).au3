@@ -9,19 +9,22 @@
 #ce ----------------------------------------------------------------------------
 
 #include <GUIConstantsEx.au3>
-#include <MsgBoxConstants.au3>
+;#include <MsgBoxConstants.au3>
 #include <EditConstants.au3>
-#include <WindowsConstants.au3>
-#include <ButtonConstants.au3>
-#include <FontConstants.au3>
-#include <StaticConstants.au3>
-#include <GuiToolTip.au3>
+;#include <WindowsConstants.au3>
+;#include <ButtonConstants.au3>
+;#include <FontConstants.au3>
+#include <StaticConstants.au3> ;for graphic (lines)
+;#include <GuiToolTip.au3>
 #include <ScreenCapture.au3> ;Screenshot Library
 #include <GDIPlus.au3> ; ImageProcessing Library
 #include <File.au3> ; temporary file name generation library
-#include <Misc.au3> ; mouse click detection
+#include <Misc.au3> ; mouse click detection and font styles
 
-   #include <GuiEdit.au3>
+#Include <ColorPicker.au3>
+;#Include <WinAPI.au3>
+
+#include <GuiEdit.au3>
 
 
 
@@ -42,12 +45,16 @@ Global $stateSD[5] ;stores slider values. index corresponds to slider Number
 Global $stateCB[6] ;stores checkbox selected. 1-4 are checkbox 2-5, 5-6 are advance & standard sliders
 
 
+Global $sTempFile
+Global $colour = "FFFFFF"
 
 
 
-;Global $iScale = RegRead("HKCU\Control Panel\Desktop\WindowMetrics", "AppliedDPI") / 96
+
+
+Global $iScale = RegRead("HKCU\Control Panel\Desktop\WindowMetrics", "AppliedDPI") / 96
+;$iScale=$iScale/1.5 ;scale correction relative to my display's scaling
 Global $old_value = 10
-Global $resize = False
 DrawWin()
 DrawElements()
 main()
@@ -57,7 +64,7 @@ main()
 Func DrawWin()
 	If @OSVersion = 'WIN_10' Then DllCall("User32.dll", "bool", "SetProcessDpiAwarenessContext", "HWND", "DPI_AWARENESS_CONTEXT" - 2)
 
-	Global $gui = GUICreate("Colours GUI", @DesktopWidth / 1.28, @DesktopHeight / 1.2857, -1, -1, BitOR($WS_SYSMENU, $WS_MINIMIZEBOX, $WS_SIZEBOX, $WS_MAXIMIZEBOX))
+	Global $gui = GUICreate("Colours GUI", @DesktopWidth / 1.28, @DesktopHeight / 1.2855, -1, -1, BitOR($WS_SYSMENU, $WS_MINIMIZEBOX, $WS_SIZEBOX, $WS_MAXIMIZEBOX))
 	;1500, 840
 	GUISetIcon("C:\Users\Shubham\Desktop\Software Projects\Colours\Icons\Colours Icon new 85.ico")
 	;_GUIScrollbars_Generate($gui, 2000, 1000)
@@ -75,6 +82,7 @@ EndFunc   ;==>DrawWin
 
 
 Func DrawElements()
+
 
 	Local $size = WinGetPos($gui)
 
@@ -101,19 +109,19 @@ Func DrawElements()
 	;GUICtrlSetState($check1, $GUI_CHECKED)
 	GUIStartGroup()
 	Global $Radio1_1 = GUICtrlCreateRadio("Clear", ($leftLB * 2.3), ($heightLB) - ($heightLB * 0.46), $lengthtLB / 6.3)
-	GUICtrlSetFont($Radio1_1, $leftLB/5, $FW_EXTRALIGHT, 0, "Calibri", $CLEARTYPE_QUALITY)
+	GUICtrlSetFont($Radio1_1, $leftLB / 5, $FW_EXTRALIGHT, 0, "Candara", 2)
 	GUICtrlSetTip(-1, "No Blur." & @CRLF & "Transparent taskbar.")
 	Global $Radio1_2 = GUICtrlCreateRadio("Fluent", (($leftLB * 2.3) * 2), ($heightLB) - ($heightLB * 0.46), ($lengthtLB / 6.3))
-	GUICtrlSetFont($Radio1_2, $leftLB/5, 200, 0, "Candara", 2)
+	GUICtrlSetFont($Radio1_2, $leftLB / 5, 200, 0, "Candara", 2)
 	GUICtrlSetTip(-1, "Windows 10 April 2018 update (build 17063) and up only." & @CRLF & "Will give the taskbar an appearance similar to Microsoft's Fluent Design guidelines." & @CRLF & "Windows disables this blur in a low power state / when on battery")
 	Global $Radio1_3 = GUICtrlCreateRadio("Opaque", (($leftLB * 2.3) * 3), ($heightLB) - ($heightLB * 0.46), ($lengthtLB / 6.3))
-	GUICtrlSetFont($Radio1_3, $leftLB/5, 200, 0, "Candara", 2)
+	GUICtrlSetFont($Radio1_3, $leftLB / 5, 200, 0, "Candara", 2)
 	GUICtrlSetTip(-1, "No transparency/translucency.")
 	Global $Radio1_4 = GUICtrlCreateRadio("Normal", (($leftLB * 2.3) * 4), ($heightLB) - ($heightLB * 0.46), ($lengthtLB / 6.3))
-	GUICtrlSetFont($Radio1_4, $leftLB/5, 200, 0, "Candara", 2)
+	GUICtrlSetFont($Radio1_4, $leftLB / 5, 200, 0, "Candara", 2)
 	GUICtrlSetTip(-1, "Regular Windows style." & @CRLF & "(as if TranslucentTB was not running)")
 	Global $Radio1_5 = GUICtrlCreateRadio("Blur", (($leftLB * 2.3) * 5), ($heightLB) - ($heightLB * 0.46), ($lengthtLB / 6.3))
-	GUICtrlSetFont($Radio1_5, $leftLB/5, 200, 0, "Candara", 2)
+	GUICtrlSetFont($Radio1_5, $leftLB / 5, 200, 0, "Candara", 2)
 	GUICtrlSetTip(-1, "Will make the taskbar slightly blurred.")
 	GUICtrlSetState($Radio1_1, $GUI_CHECKED)
 
@@ -142,19 +150,19 @@ Func DrawElements()
 
 	GUIStartGroup()
 	Global $Radio2_1 = GUICtrlCreateRadio("Clear", (($lengthtLB / 6) * 1), $topLB + $heightLB + ($heightLB) - ($heightLB * 0.46), ($lengthtLB / 6.3))
-	GUICtrlSetFont(-1, $leftLB/5, $FW_EXTRALIGHT, 0, "Candara", 2)
+	GUICtrlSetFont(-1, $leftLB / 5, $FW_EXTRALIGHT, 0, "Candara", 2)
 	GUICtrlSetTip(-1, "No Blur." & @CRLF & "Transparent taskbar.")
 	Global $Radio2_2 = GUICtrlCreateRadio("Fluent", (($lengthtLB / 6) * 2), $topLB + $heightLB + ($heightLB) - ($heightLB * 0.46), ($lengthtLB / 6.3))
-	GUICtrlSetFont(-1, $leftLB/5, $FW_EXTRALIGHT, 0, "Candara", 2)
+	GUICtrlSetFont(-1, $leftLB / 5, $FW_EXTRALIGHT, 0, "Candara", 2)
 	GUICtrlSetTip(-1, "Windows 10 April 2018 update (build 17063) and up only." & @CRLF & "Will give the taskbar an appearance similar to Microsoft's Fluent Design guidelines." & @CRLF & "Windows disables this blur in a low power state / when on battery")
 	Global $Radio2_3 = GUICtrlCreateRadio("Opaque", (($lengthtLB / 6) * 3), $topLB + $heightLB + ($heightLB) - ($heightLB * 0.46), ($lengthtLB / 6.3))
-	GUICtrlSetFont(-1, $leftLB/5, $FW_EXTRALIGHT, 0, "Candara", 2)
+	GUICtrlSetFont(-1, $leftLB / 5, $FW_EXTRALIGHT, 0, "Candara", 2)
 	GUICtrlSetTip(-1, "No transparency/translucency.")
 	Global $Radio2_4 = GUICtrlCreateRadio("Normal", (($lengthtLB / 6) * 4), $topLB + $heightLB + ($heightLB) - ($heightLB * 0.46), ($lengthtLB / 6.3))
-	GUICtrlSetFont(-1, $leftLB/5, $FW_EXTRALIGHT, 0, "Candara", 2)
+	GUICtrlSetFont(-1, $leftLB / 5, $FW_EXTRALIGHT, 0, "Candara", 2)
 	GUICtrlSetTip(-1, "Regular Windows style." & @CRLF & "(as if TranslucentTB was not running)")
 	Global $Radio2_5 = GUICtrlCreateRadio("Blur", (($lengthtLB / 6) * 5), $topLB + $heightLB + ($heightLB) - ($heightLB * 0.46), ($lengthtLB / 6.3))
-	GUICtrlSetFont(-1, $leftLB/5, $FW_EXTRALIGHT, 0, "Candara", 2)
+	GUICtrlSetFont(-1, $leftLB / 5, $FW_EXTRALIGHT, 0, "Candara", 2)
 	GUICtrlSetTip(-1, "Will make the taskbar slightly blurred.")
 	GUICtrlSetState($Radio2_2, $GUI_CHECKED)
 
@@ -183,19 +191,19 @@ Func DrawElements()
 
 	GUIStartGroup()
 	Global $Radio3_1 = GUICtrlCreateRadio("Clear", ($lengthtLB / 6) * 1, ($topLB * 2) + ($heightLB * 2) + ($heightLB) - ($heightLB * 0.46), ($lengthtLB / 6.3))
-	GUICtrlSetFont(-1, $leftLB/5, $FW_EXTRALIGHT, 0, "Candara", 2)
+	GUICtrlSetFont(-1, $leftLB / 5, $FW_EXTRALIGHT, 0, "Candara", 2)
 	GUICtrlSetTip(-1, "No Blur." & @CRLF & "Transparent taskbar.")
 	Global $Radio3_2 = GUICtrlCreateRadio("Fluent", ($lengthtLB / 6) * 2, ($topLB * 2) + ($heightLB * 2) + ($heightLB) - ($heightLB * 0.46), ($lengthtLB / 6.3))
-	GUICtrlSetFont(-1, $leftLB/5, $FW_EXTRALIGHT, 0, "Candara", 2)
+	GUICtrlSetFont(-1, $leftLB / 5, $FW_EXTRALIGHT, 0, "Candara", 2)
 	GUICtrlSetTip(-1, "Windows 10 April 2018 update (build 17063) and up only." & @CRLF & "Will give the taskbar an appearance similar to Microsoft's Fluent Design guidelines." & @CRLF & "Windows disables this blur in a low power state / when on battery")
 	Global $Radio3_3 = GUICtrlCreateRadio("Opaque", ($lengthtLB / 6) * 3, ($topLB * 2) + ($heightLB * 2) + ($heightLB) - ($heightLB * 0.46), ($lengthtLB / 6.3))
-	GUICtrlSetFont(-1, $leftLB/5, $FW_EXTRALIGHT, 0, "Candara", 2)
+	GUICtrlSetFont(-1, $leftLB / 5, $FW_EXTRALIGHT, 0, "Candara", 2)
 	GUICtrlSetTip(-1, "No transparency/translucency.")
 	Global $Radio3_4 = GUICtrlCreateRadio("Normal", ($lengthtLB / 6) * 4, ($topLB * 2) + ($heightLB * 2) + ($heightLB) - ($heightLB * 0.46), ($lengthtLB / 6.3))
-	GUICtrlSetFont(-1, $leftLB/5, $FW_EXTRALIGHT, 0, "Candara", 2)
+	GUICtrlSetFont(-1, $leftLB / 5, $FW_EXTRALIGHT, 0, "Candara", 2)
 	GUICtrlSetTip(-1, "Regular Windows style." & @CRLF & "(as if TranslucentTB was not running)")
 	Global $Radio3_5 = GUICtrlCreateRadio("Blur", ($lengthtLB / 6) * 5, ($topLB * 2) + ($heightLB * 2) + ($heightLB) - ($heightLB * 0.46), ($lengthtLB / 6.3))
-	GUICtrlSetFont(-1, $leftLB/5, $FW_EXTRALIGHT, 0, "Candara", 2)
+	GUICtrlSetFont(-1, $leftLB / 5, $FW_EXTRALIGHT, 0, "Candara", 2)
 	GUICtrlSetTip(-1, "Will make the taskbar slightly blurred.")
 	GUICtrlSetState($Radio3_3, $GUI_CHECKED)
 
@@ -222,19 +230,19 @@ Func DrawElements()
 
 	GUIStartGroup()
 	Global $Radio4_1 = GUICtrlCreateRadio("Clear", ($lengthtLB / 6) * 1, ($topLB * 3) + ($heightLB * 3) + ($heightLB) - ($heightLB * 0.46), ($lengthtLB / 6.3))
-	GUICtrlSetFont(-1, $leftLB/5, $FW_EXTRALIGHT, 0, "Candara", 2)
+	GUICtrlSetFont(-1, $leftLB / 5, $FW_EXTRALIGHT, 0, "Candara", 2)
 	GUICtrlSetTip(-1, "No Blur." & @CRLF & "Transparent taskbar.")
 	Global $Radio4_2 = GUICtrlCreateRadio("Fluent", ($lengthtLB / 6) * 2, ($topLB * 3) + ($heightLB * 3) + ($heightLB) - ($heightLB * 0.46), ($lengthtLB / 6.3))
-	GUICtrlSetFont(-1, $leftLB/5, $FW_EXTRALIGHT, 0, "Candara", 2)
+	GUICtrlSetFont(-1, $leftLB / 5, $FW_EXTRALIGHT, 0, "Candara", 2)
 	GUICtrlSetTip(-1, "Windows 10 April 2018 update (build 17063) and up only." & @CRLF & "Will give the taskbar an appearance similar to Microsoft's Fluent Design guidelines." & @CRLF & "Windows disables this blur in a low power state / when on battery")
 	Global $Radio4_3 = GUICtrlCreateRadio("Opaque", ($lengthtLB / 6) * 3, ($topLB * 3) + ($heightLB * 3) + ($heightLB) - ($heightLB * 0.46), ($lengthtLB / 6.3))
-	GUICtrlSetFont(-1, $leftLB/5, $FW_EXTRALIGHT, 0, "Candara", 2)
+	GUICtrlSetFont(-1, $leftLB / 5, $FW_EXTRALIGHT, 0, "Candara", 2)
 	GUICtrlSetTip(-1, "No transparency/translucency.")
 	Global $Radio4_4 = GUICtrlCreateRadio("Normal", ($lengthtLB / 6) * 4, ($topLB * 3) + ($heightLB * 3) + ($heightLB) - ($heightLB * 0.46), ($lengthtLB / 6.3))
-	GUICtrlSetFont(-1, $leftLB/5, $FW_EXTRALIGHT, 0, "Candara", 2)
+	GUICtrlSetFont(-1, $leftLB / 5, $FW_EXTRALIGHT, 0, "Candara", 2)
 	GUICtrlSetTip(-1, "Regular Windows style." & @CRLF & "(as if TranslucentTB was not running)")
 	Global $Radio4_5 = GUICtrlCreateRadio("Blur", ($lengthtLB / 6) * 5, ($topLB * 3) + ($heightLB * 3) + ($heightLB) - ($heightLB * 0.46), ($lengthtLB / 6.3))
-	GUICtrlSetFont(-1, $leftLB/5, $FW_EXTRALIGHT, 0, "Candara", 2)
+	GUICtrlSetFont(-1, $leftLB / 5, $FW_EXTRALIGHT, 0, "Candara", 2)
 	GUICtrlSetTip(-1, "Will make the taskbar slightly blurred.")
 	GUICtrlSetState($Radio4_4, $GUI_CHECKED)
 
@@ -263,19 +271,19 @@ Func DrawElements()
 
 	GUIStartGroup()
 	Global $Radio5_1 = GUICtrlCreateRadio("Clear", ($lengthtLB / 6) * 1, ($topLB * 4) + ($heightLB * 4) + ($heightLB) - ($heightLB * 0.46), ($lengthtLB / 6.3))
-	GUICtrlSetFont(-1, $leftLB/5, $FW_EXTRALIGHT, 0, "Candara", 2)
+	GUICtrlSetFont(-1, $leftLB / 5, $FW_EXTRALIGHT, 0, "Candara", 2)
 	GUICtrlSetTip(-1, "No Blur." & @CRLF & "Transparent taskbar.")
 	Global $Radio5_2 = GUICtrlCreateRadio("Fluent", ($lengthtLB / 6) * 2, ($topLB * 4) + ($heightLB * 4) + ($heightLB) - ($heightLB * 0.46), ($lengthtLB / 6.3))
-	GUICtrlSetFont(-1, $leftLB/5, $FW_EXTRALIGHT, 0, "Candara", 2)
+	GUICtrlSetFont(-1, $leftLB / 5, $FW_EXTRALIGHT, 0, "Candara", 2)
 	GUICtrlSetTip(-1, "Windows 10 April 2018 update (build 17063) and up only." & @CRLF & "Will give the taskbar an appearance similar to Microsoft's Fluent Design guidelines." & @CRLF & "Windows disables this blur in a low power state / when on battery")
 	Global $Radio5_3 = GUICtrlCreateRadio("Opaque", ($lengthtLB / 6) * 3, ($topLB * 4) + ($heightLB * 4) + ($heightLB) - ($heightLB * 0.46), ($lengthtLB / 6.3))
-	GUICtrlSetFont(-1, $leftLB/5, $FW_EXTRALIGHT, 0, "Candara", 2)
+	GUICtrlSetFont(-1, $leftLB / 5, $FW_EXTRALIGHT, 0, "Candara", 2)
 	GUICtrlSetTip(-1, "No transparency/translucency.")
 	Global $Radio5_4 = GUICtrlCreateRadio("Normal", ($lengthtLB / 6) * 4, ($topLB * 4) + ($heightLB * 4) + ($heightLB) - ($heightLB * 0.46), ($lengthtLB / 6.3))
-	GUICtrlSetFont(-1, $leftLB/5, $FW_EXTRALIGHT, 0, "Candara", 2)
+	GUICtrlSetFont(-1, $leftLB / 5, $FW_EXTRALIGHT, 0, "Candara", 2)
 	GUICtrlSetTip(-1, "Regular Windows style." & @CRLF & "(as if TranslucentTB was not running)")
 	Global $Radio5_5 = GUICtrlCreateRadio("Blur", ($lengthtLB / 6) * 5, ($topLB * 4) + ($heightLB * 4) + ($heightLB) - ($heightLB * 0.46), ($lengthtLB / 6))
-	GUICtrlSetFont(-1, $leftLB/5, $FW_EXTRALIGHT, 0, "Candara", 2)
+	GUICtrlSetFont(-1, $leftLB / 5, $FW_EXTRALIGHT, 0, "Candara", 2)
 	GUICtrlSetTip(-1, "Will make the taskbar slightly blurred.")
 	GUICtrlSetState($Radio5_5, $GUI_CHECKED)
 
@@ -297,11 +305,11 @@ Func DrawElements()
 
 
 	Global $StandardCtrl = GUICtrlCreateCheckbox("Standard Mode", $size[2] / 1.7, $topLB * 1.5, $size[2] / 8)
-	GUICtrlSetFont(-1, $leftLB/5, $FW_EXTRALIGHT, 0, "Candara", 2)
+	GUICtrlSetFont(-1, $leftLB / 5, $FW_EXTRALIGHT, 0, "Candara", 2)
 	GUICtrlSetTip(-1, "Everything you need to get that Translucent Taskabar", "Standard Controls", 1, BitOR(1, 2))
 	Global $AdvanceCtrl = GUICtrlCreateCheckbox("Advance Mode", $size[2] / 1.25, $topLB * 1.5, $size[2] / 8)
-	GUICtrlSetFont(-1, $leftLB/5, $FW_EXTRALIGHT, 0, "Candara", 2)
-	GUICtrlSetTip(-1, "Extra Customisation." & @CRLF & "Includes Dynamic Controls", "Advance Controls", 1, BitOR(1, 2))
+	GUICtrlSetFont(-1, $leftLB / 5, $FW_EXTRALIGHT, 0, "Candara", 2)
+	GUICtrlSetTip(-1, "Extra Customisation. + Dynamic Controls." & @CRLF & "Dynamic Controls : They all have their own accent, color and opacity settings", "Advance Controls", 1, BitOR(1, 2))
 
 	;BitOR($SS_CENTER, $SS_CENTERIMAGE)
 
@@ -309,48 +317,25 @@ Func DrawElements()
 
 
 
-   ;----------------------------------------------------colour palette------------------------------------------------------------
+	;----------------------------------------------------colour palette------------------------------------------------------------
 
 
 
-	Global $paletteGR = GUICtrlCreateGroup("Colour Selection", $size[2] / 1.81, $topLB * 5, $size[2] / 2.5, $heightLB*1.5)
+	Global $paletteGR = GUICtrlCreateGroup("Colour Selection", $size[2] / 1.81, $topLB * 5, $size[2] / 2.5, $heightLB * 1.5)
 	GUICtrlSetFont(-1, ($topLB / 2.1), 500, 0, "Segoe UI", 5)
 
 
-	Global $btauto = GUICtrlCreateButton("Autodetect", $size[2] / 1.72, $topLB * 7, $leftLB * 3)
-	GUICtrlSetFont(-1, $leftLB/5, $FW_EXTRALIGHT, 0, "Candara", 2)
-	GUICtrlSetTip(-1, "Autodetect currently selected colour in Windows Settings." & @CRLF & "DO NOT move the mouse for a few seconds after clicking this." , "Aotodetect", 1, BitOR(1, 2)) ;& @CRLF & "ALLOW SOME SECONDS to open setting and detect current colour"
-	Global $bteye = GUICtrlCreateButton("EyeDropper", $size[2] / 1.42, $topLB * 7, $leftLB * 3)
-	GUICtrlSetFont(-1, $leftLB/5, $FW_EXTRALIGHT, 0, "Candara", 2)
+	Global $btauto = GUICtrlCreateButton("Autodetect", $size[2] / 1.72, $topLB * 7, $leftLB * 3, $topLB * 1.3)
+	GUICtrlSetFont(-1, $leftLB / 5, $FW_EXTRALIGHT, 0, "Candara", 2)
+	GUICtrlSetTip(-1, "Autodetect currently selected colour in Windows Settings." & @CRLF & "DO NOT move the mouse for a few seconds after clicking this.", "Aotodetect", 1, BitOR(1, 2))  ;& @CRLF & "ALLOW SOME SECONDS to open setting and detect current colour"
+	Global $bteye = GUICtrlCreateButton("EyeDropper", $size[2] / 1.42, $topLB * 7, $leftLB * 3, $topLB * 1.3)
+	GUICtrlSetFont(-1, $leftLB / 5, $FW_EXTRALIGHT, 0, "Candara", 2)
 	GUICtrlSetTip(-1, "Turns the mouse into an Eyedropper" & @CRLF & "allowing selection of any colour from UI.", "Eyedropper", 1, BitOR(1, 2)) ;@CRLF & "Samples 2 pixels diagonally above the mouse pointer."
 
-   Global $btpick = GUICtrlCreateButton("Colour Picker", $size[2] / 1.21, $topLB * 7, $leftLB * 3)
-   GUICtrlSetFont(-1, $leftLB/5, $FW_EXTRALIGHT, 0, "Candara", 2)
-   GUICtrlSetTip(-1, "Choose from a colour palette" , "Colour Picker", 1, BitOR(1, 2))
+	Global $btpick = _GUIColorPicker_Create("Colour Picker", $size[2] / 1.21, $topLB * 7, $leftLB * 3, $topLB * 1.3, 0xFF00FF, BitOR($CP_FLAG_CHOOSERBUTTON, $CP_FLAG_ARROWSTYLE, $CP_FLAG_MOUSEWHEEL), '', 4, 5, 0, '', 'More...')
 
-	Global $preview = GUICtrlCreatePic("C:\Users\Shubham\AppData\Local\Temp\colour_Sample_vsm.jpg", $size[2] / 1.62, $topLB * 9.5, $leftLB, $topLB*2)
-   GUICtrlSetTip(-1, "Preview of selected area for colour extraction" , "Sample Viewer", 0, BitOR(1, 1))
-
-   Global $arrow = GUICtrlCreateLabel(ChrW(0x27A2), $size[2] / 1.485,$topLB * 9.5,0,0)
-   GUICtrlSetFont(-1, $leftLB*(2/5))
-
-   Global $colourout = GUICtrlCreateGraphic($size[2] / 1.4, $topLB * 9.5, $leftLB, $topLB*2)
-   GUICtrlSetGraphic(-1, $GUI_GR_RECT)
-   GUICtrlSetColor (-1 , 0x000F0F )
-
-
-   Global $arrow2 = GUICtrlCreateLabel(ChrW(0x27A3), $size[2] / 1.298,$topLB * 9.5,0,0)
-   GUICtrlSetFont(-1, $leftLB*(2/5))
-
-   Global $hexsym = GUICtrlCreateLabel("0x", $size[2] / 1.23, $topLB * 9.9)
-   GUICtrlSetFont(-1, $leftLB/5, $FW_EXTRALIGHT, 0, "Segoe UI", 2)
-   Global $colourtext = GUICtrlCreateInput("", $size[2] / 1.2, $topLB * 9.8, $leftLB*2, $topLB*1.45 )
-   GUICtrlSetLimit(-1, 6)
-   GUICtrlSetFont(-1, $leftLB/5, $FW_EXTRALIGHT, 0, "Segoe UI", 2)
-   GUICtrlSetTip(-1, "HEX value of the colour." , "Colour Hex Viewer", 0, BitOR(1, 1))
-
-
-   ;----------------------------------------------------apply colour to---------------------------------------------------------------
+	GUICtrlSetFont(-1, $leftLB / 5, $FW_EXTRALIGHT, 0, "Candara", 2)
+	GUICtrlSetTip(-1, "Choose from a colour palette", "Colour Picker", 1, BitOR(1, 2))
 
 
 
@@ -359,57 +344,192 @@ Func DrawElements()
 
 
 
+	Global $preview = GUICtrlCreatePic($sTempFile, $size[2] / 1.62, $topLB * 9.5, $leftLB, $topLB * 2)
+	GUICtrlSetTip(-1, "Preview of selected area for colour extraction", "Sample Viewer", 0, BitOR(1, 1))
+
+	Global $arrow = GUICtrlCreateLabel(ChrW(0x27A2), $size[2] / 1.485, $topLB * 9.5, 0, 0)
+	GUICtrlSetFont(-1, $leftLB * (2 / 5))
+
+	Global $colourout = GUICtrlCreateGraphic($size[2] / 1.4, $topLB * 9.5, $leftLB, $topLB * 2)
+	GUICtrlSetGraphic(-1, $GUI_GR_RECT)
+	GUICtrlSetColor(-1, 0x000000)
+	GUICtrlSetBkColor($colourout, "0x" & $colour)
+
+
+	Global $arrow2 = GUICtrlCreateLabel(ChrW(0x27A3), $size[2] / 1.298, $topLB * 9.5, 0, 0)
+	GUICtrlSetFont(-1, $leftLB * (2 / 5))
+
+	Global $hexsym = GUICtrlCreateLabel("0x", $size[2] / 1.23, $topLB * 9.9)
+	GUICtrlSetFont(-1, $leftLB / 5, $FW_EXTRALIGHT, 0, "Segoe UI", 2)
+	Global $colourtext = GUICtrlCreateInput("", $size[2] / 1.2, $topLB * 9.8, $leftLB * 2, $topLB * 1.45)
+	GUICtrlSetLimit(-1, 6)
+	GUICtrlSetFont(-1, $leftLB / 5, $FW_EXTRALIGHT, 0, "Segoe UI", 2)
+	GUICtrlSetTip(-1, "HEX value of the colour.", "Colour Hex Viewer", 0, BitOR(1, 1))
 
 
 
 
 
-   Global $applyGR = GUICtrlCreateGroup("Apply Colour", $size[2] / 1.81, $topLB * 13, $size[2] / 2.5, $heightLB*1.6)
-   GUICtrlSetFont(-1, ($topLB / 2.1), 500, 0, "Segoe UI", 5)
 
 
 
-	Global $colourset_tas = GUICtrlCreateLabel("Desktop :", $size[2] / 1.7,$topLB * 14.8,$leftLB*2.0,$topLB*1.45 )
-   GUICtrlSetFont(-1, $leftLB/5, $FW_EXTRALIGHT, 0, "Times New Roman", 2 )
-   Global $colourset_tastx = GUICtrlCreateInput("", $size[2] / 1.54, $topLB * 14.7 , $leftLB*2.0, $topLB*1.45 )
-   GUICtrlSetLimit(-1, 6)
-   _GUICtrlEdit_SetCueBanner(-1, "0x")
-   GUICtrlSetFont(-1, $leftLB/5.5, $FW_EXTRALIGHT, 0, "Segoe UI", 2)
-   GUICtrlSetTip(-1, "Colour for taskbar on Desktop.")
 
 
-   	Global $colourset_max = GUICtrlCreateLabel("Maximised :", $size[2] / 1.3,$topLB * 14.8,$leftLB*2.2,$topLB*1.45 )
-   GUICtrlSetFont(-1, $leftLB/5, $FW_EXTRALIGHT, 0, "Candara", 2 )
-	Global $colourset_maxtx = GUICtrlCreateInput("", $size[2] / 1.184, $topLB * 14.7 , $leftLB*2.0, $topLB*1.45 )
-   GUICtrlSetLimit(-1, 6)
-   _GUICtrlEdit_SetCueBanner(-1, "0x")
-   GUICtrlSetFont(-1, $leftLB/5.5, $FW_EXTRALIGHT, 0, "Segoe UI", 2)
-   GUICtrlSetTip(-1, "Colour for taskbar during fullscreen.")
-
-   	Global $colourset_sta = GUICtrlCreateLabel("Start      :", $size[2] / 1.7,$topLB * 16.8,$leftLB*2.0,$topLB*1.45 )
-   GUICtrlSetFont(-1, $leftLB/5, $FW_EXTRALIGHT, 0, "Candara", 2 )
-	Global $colourset_statx = GUICtrlCreateInput("", $size[2] / 1.54, $topLB * 16.7 , $leftLB*2.0, $topLB*1.45 )
-   GUICtrlSetLimit(-1, 6)
-   _GUICtrlEdit_SetCueBanner(-1, "0x")
-   GUICtrlSetFont(-1, $leftLB/5.5, $FW_EXTRALIGHT, 0, "Segoe UI", 2)
-   GUICtrlSetTip(-1, "Colour for taskbar during Start")
+	;----------------------------------------------------apply colour to---------------------------------------------------------------
 
 
-   	Global $colourset_cor = GUICtrlCreateLabel("Cortana    :", $size[2] / 1.3,$topLB * 16.8,$leftLB*2.0,$topLB*1.45 )
-   GUICtrlSetFont(-1, $leftLB/5, $FW_EXTRALIGHT, 0, "Candara", 2 )
-	Global $colourset_cortx = GUICtrlCreateInput("", $size[2] / 1.184, $topLB * 16.7 , $leftLB*2.0, $topLB*1.45 )
-   GUICtrlSetLimit(-1, 6)
-   _GUICtrlEdit_SetCueBanner(-1, "0x")
-   GUICtrlSetFont(-1, $leftLB/5.5, $FW_EXTRALIGHT, 0, "Segoe UI", 2)
-   GUICtrlSetTip(-1, "Colour for taskbar during Cortana.")
 
-   	Global $colourset_tim = GUICtrlCreateLabel("Timeline :", $size[2] / 1.7,$topLB * 18.8,$leftLB*2.0,$topLB*1.45 )
-   GUICtrlSetFont(-1, $leftLB/5, $FW_EXTRALIGHT, 0, "Candara", 2 )
-	Global $colourset_timtx = GUICtrlCreateInput("", $size[2] / 1.54, $topLB * 18.7 , $leftLB*2.0, $topLB*1.45 )
-   GUICtrlSetLimit(-1, 6)
-   _GUICtrlEdit_SetCueBanner(-1, "0x")
-   GUICtrlSetFont(-1, $leftLB/5.5, $FW_EXTRALIGHT, 0, "Segoe UI", 2)
-   GUICtrlSetTip(-1, "Colour for taskbar wne Timeline open.")
+
+
+
+
+
+	Global $applyGR = GUICtrlCreateGroup("Apply Colour", $size[2] / 1.81, $topLB * 13, $size[2] / 2.5, $heightLB * 1.6)
+	GUICtrlSetFont(-1, ($topLB / 2.1), 500, 0, "Segoe UI", 5)
+
+
+
+	Global $colourset_tas = GUICtrlCreateLabel("Desktop :", $size[2] / 1.7, $topLB * 14.8, $leftLB * 2.0, $topLB * 1.45)
+	GUICtrlSetFont(-1, $leftLB / 5, $FW_EXTRALIGHT, 0, "Candara", 2)
+	Global $colourset_tastx = GUICtrlCreateInput("", $size[2] / 1.54, $topLB * 14.7, $leftLB * 2.0, $topLB * 1.45)
+	GUICtrlSetLimit(-1, 6)
+	_GUICtrlEdit_SetCueBanner(-1, "0x")
+	GUICtrlSetFont(-1, $leftLB / 5.5, $FW_EXTRALIGHT, 0, "Segoe UI", 2)
+	GUICtrlSetTip(-1, "Colour for taskbar on Desktop.")
+
+
+	Global $colourset_max = GUICtrlCreateLabel("Maximised :", $size[2] / 1.3, $topLB * 14.8, $leftLB * 2.2, $topLB * 1.45)
+	GUICtrlSetFont(-1, $leftLB / 5, $FW_EXTRALIGHT, 0, "Candara", 2)
+	Global $colourset_maxtx = GUICtrlCreateInput("", $size[2] / 1.184, $topLB * 14.7, $leftLB * 2.0, $topLB * 1.45)
+	GUICtrlSetLimit(-1, 6)
+	_GUICtrlEdit_SetCueBanner(-1, "0x")
+	GUICtrlSetFont(-1, $leftLB / 5.5, $FW_EXTRALIGHT, 0, "Segoe UI", 2)
+	GUICtrlSetTip(-1, "Colour for taskbar during fullscreen.")
+
+	Global $colourset_sta = GUICtrlCreateLabel("Start      :", $size[2] / 1.7, $topLB * 16.8, $leftLB * 2.0, $topLB * 1.45)
+	GUICtrlSetFont(-1, $leftLB / 5, $FW_EXTRALIGHT, 0, "Candara", 2)
+	Global $colourset_statx = GUICtrlCreateInput("", $size[2] / 1.54, $topLB * 16.7, $leftLB * 2.0, $topLB * 1.45)
+	GUICtrlSetLimit(-1, 6)
+	_GUICtrlEdit_SetCueBanner(-1, "0x")
+	GUICtrlSetFont(-1, $leftLB / 5.5, $FW_EXTRALIGHT, 0, "Segoe UI", 2)
+	GUICtrlSetTip(-1, "Colour for taskbar during Start")
+
+
+	Global $colourset_cor = GUICtrlCreateLabel("Cortana    :", $size[2] / 1.3, $topLB * 16.8, $leftLB * 2.0, $topLB * 1.45)
+	GUICtrlSetFont(-1, $leftLB / 5, $FW_EXTRALIGHT, 0, "Candara", 2)
+	Global $colourset_cortx = GUICtrlCreateInput("", $size[2] / 1.184, $topLB * 16.7, $leftLB * 2.0, $topLB * 1.45)
+	GUICtrlSetLimit(-1, 6)
+	_GUICtrlEdit_SetCueBanner(-1, "0x")
+	GUICtrlSetFont(-1, $leftLB / 5.5, $FW_EXTRALIGHT, 0, "Segoe UI", 2)
+	GUICtrlSetTip(-1, "Colour for taskbar during Cortana.")
+
+	Global $colourset_tim = GUICtrlCreateLabel("Timeline :", $size[2] / 1.7, $topLB * 18.8, $leftLB * 2.0, $topLB * 1.45)
+	GUICtrlSetFont(-1, $leftLB / 5, $FW_EXTRALIGHT, 0, "Candara", 2)
+	Global $colourset_timtx = GUICtrlCreateInput("", $size[2] / 1.54, $topLB * 18.7, $leftLB * 2.0, $topLB * 1.45)
+	GUICtrlSetLimit(-1, 6)
+	_GUICtrlEdit_SetCueBanner(-1, "0x")
+	GUICtrlSetFont(-1, $leftLB / 5.5, $FW_EXTRALIGHT, 0, "Segoe UI", 2)
+	GUICtrlSetTip(-1, "Colour for taskbar wne Timeline open.")
+
+
+
+
+
+
+
+
+	;------------------------------------------------------ aero peek behaviour---------------------------------------------------
+
+	Global $peekGR = GUICtrlCreateGroup("Aero Peek", $size[2] / 1.81, $topLB * 21.3, $size[2] / 8.3, $heightLB * 1.9)
+	GUICtrlSetFont(-1, ($topLB / 2.1), 500, 0, "Segoe UI", 5)
+
+
+	GUIStartGroup()
+	Global $peekdynamic = GUICtrlCreateRadio("Dynamic", $size[2] / 1.73, $topLB * 23, ($lengthtLB / 6.3))
+	GUICtrlSetFont(-1, $leftLB / 5, 200, 0, "Candara", 2)
+	GUICtrlSetTip(-1, "Invisible when desktop is already visible.")
+	Global $peekshow = GUICtrlCreateRadio("Show", $size[2] / 1.73, $topLB * 24.6, ($lengthtLB / 6.3))
+	GUICtrlSetFont(-1, $leftLB / 5, 200, 0, "Candara", 2)
+	GUICtrlSetTip(-1, "Always visible")
+	Global $peekhide = GUICtrlCreateRadio("Hide", $size[2] / 1.73, $topLB * 26.3, ($lengthtLB / 6.3))
+	GUICtrlSetFont(-1, $leftLB / 5, 200, 0, "Candara", 2)
+	GUICtrlSetTip(-1, "Always hidden")
+	GUICtrlSetState($peekshow, $GUI_CHECKED)
+
+
+	Global $peekmain = GUICtrlCreateLabel("Peek only main ", $size[2] / 1.755, $topLB * 28, $leftLB * 2.5, $topLB * 1.45)
+	GUICtrlSetFont(-1, $leftLB / 5, $FW_EXTRALIGHT, 0, "Candara", 2)
+
+    GUIStartGroup()
+    Global $peekmainyes = GUICtrlCreateRadio("Yes", $size[2] / 1.75, $topLB * 29.3, ($lengthtLB / 9.5))
+	GUICtrlSetFont(-1, $leftLB / 5.5, 200, 0, "Candara", 2)
+	GUICtrlSetTip(-1, "Decides whether only the main monitor is considered when dynamic peek is enabled.")
+    Global $peekmainno = GUICtrlCreateRadio("No", $size[2] / 1.61, $topLB * 29.3, ($lengthtLB / 12))
+	GUICtrlSetFont(-1, $leftLB / 5.5, 200, 0, "Candara", 2)
+	GUICtrlSetTip(-1, "Decides whether only the main monitor is considered when dynamic peek is enabled.")
+	GUICtrlSetState($peekmain, $GUI_CHECKED)
+
+
+
+	;--------------------------------------------------------- extras ----------------------------------------------------------
+
+	Global $extrasGR = GUICtrlCreateGroup("Extras", $size[2] / 1.44, $topLB * 21.3, $size[2] / 7.5, $heightLB * 1.9)
+	GUICtrlSetFont(-1, ($topLB / 2.1), 500, 0, "Segoe UI", 5)
+
+	Global $sleeptime = GUICtrlCreateLabel("Sleep Time ", $size[2] / 1.42, $topLB * 23, $leftLB * 2.0, $topLB * 1.45)
+	GUICtrlSetFont(-1, $leftLB / 5, $FW_EXTRALIGHT, 0, "Candara", 2)
+	Global $sleeptime_tx = GUICtrlCreateInput("", $size[2] / 1.293, $topLB * 23, $leftLB * 1.32, $topLB * 1.3)
+	GUICtrlSetLimit(-1, 5)
+	_GUICtrlEdit_SetCueBanner(-1, "000")
+	GUICtrlSetFont(-1, $leftLB / 5.5, $FW_EXTRALIGHT, 0, "Segoe UI", 2)
+	GUICtrlSetTip(-1, "Sleep time in milliseconds." & @CRLF & "a shorter time reduces flicker when opening start" & @CRLF & "but results in higher CPU usage." & @CRLF & "Default is 10.")
+
+
+    Global $systemtray = GUICtrlCreateLabel("System Tray icon", $size[2] / 1.42, $topLB * 25, $leftLB * 3, $topLB * 1.3)
+	GUICtrlSetFont(-1, $leftLB / 5, $FW_EXTRALIGHT, 0, "Candara", 2)
+
+	GUIStartGroup()
+	Global $trayyes = GUICtrlCreateRadio("Yes", $size[2] / 1.41, $topLB * 26.25, ($lengthtLB / 10))
+	GUICtrlSetFont(-1, $leftLB / 5.5, 200, 0, "Candara", 2)
+	GUICtrlSetTip(-1, "Show icon in system tray when TranslucentTB is running.")
+    Global $trayno = GUICtrlCreateRadio("No", $size[2] / 1.31, $topLB * 26.25, ($lengthtLB / 10))
+	GUICtrlSetFont(-1, $leftLB / 5.5, 200, 0, "Candara", 2)
+	GUICtrlSetTip(-1, "No icon in system tray when TranslucentTB is running.")
+
+	Global $logging = GUICtrlCreateLabel("Verbose Logging", $size[2] / 1.42, $topLB * 28, $leftLB * 3, $topLB * 1.3)
+	GUICtrlSetFont(-1, $leftLB / 5, $FW_EXTRALIGHT, 0, "Candara", 2)
+
+	GUIStartGroup()
+	Global $loggingyes = GUICtrlCreateRadio("Yes", $size[2] / 1.41, $topLB * 29.25, ($lengthtLB / 10))
+	GUICtrlSetFont(-1, $leftLB / 5.5, 200, 0, "Candara", 2)
+	GUICtrlSetTip(-1, "More informative logging. Can make huge log files.")
+    Global $loggingno = GUICtrlCreateRadio("No", $size[2] / 1.31, $topLB * 29.25, ($lengthtLB / 10))
+	GUICtrlSetFont(-1, $leftLB / 5.5, 200, 0, "Candara", 2)
+	GUICtrlSetTip(-1, "more informative logging. Can make huge log files.")
+
+
+	GUICtrlSetState($trayyes, $GUI_CHECKED)
+
+
+    GUICtrlSetState($loggingno, $GUI_CHECKED)
+
+
+
+;---------------------------------------------------final buttons---------------------------------------------------------
+
+   Global $finalload = GUICtrlCreateButton("Load", $size[2] / 1.17, $topLB * 23, $leftLB * 3, $topLB * 1.5)
+	GUICtrlSetFont(-1, $leftLB / 5, $FW_EXTRALIGHT, 0, "Segoe UI", 2)
+	GUICtrlSetTip(-1, "Load current TranslucentTB Settings", "", 1, BitOR(1, 2))  ;& @CRLF & "ALLOW SOME SECONDS to open setting and detect current colour"
+
+Global $finalpreview = GUICtrlCreateButton("Preview", $size[2] / 1.17, $topLB * 25.5, $leftLB * 3, $topLB * 1.5)
+	GUICtrlSetFont(-1, $leftLB / 5, $FW_EXTRALIGHT, 0, "Segoe UI", 2)
+	GUICtrlSetTip(-1, "Apply current settings to preview", "", 1, BitOR(1, 2))  ;& @CRLF & "ALLOW SOME SECONDS to open setting and detect current colour"
+
+Global $finalsave = GUICtrlCreateButton("Save", $size[2] / 1.17, $topLB * 28, $leftLB * 3, $topLB * 1.5)
+	GUICtrlSetFont(-1, $leftLB / 5, $FW_EXTRALIGHT, 0, "Segoe UI", 2)
+	GUICtrlSetTip(-1, "Apply and Save current settings.", "", 1, BitOR(1, 2))  ;& @CRLF & "ALLOW SOME SECONDS to open setting and detect current colour"
+
+
 
 
 
@@ -459,7 +579,6 @@ Func main()
 
 		If $n = $GUI_EVENT_CLOSE Then Exit
 		Local $Info = GUIGetCursorInfo()
-
 
 
 		If @error Then
@@ -642,6 +761,16 @@ Func main()
 					GUICtrlSetState($Radio5_5, $GUI_HIDE)
 					GUICtrlSetState($InputBox_5, $GUI_HIDE)
 					GUICtrlSetState($Slider_5, $GUI_HIDE)
+					GUICtrlSetState($colourset_max, $GUI_HIDE)
+					GUICtrlSetState($colourset_maxtx, $GUI_HIDE)
+					GUICtrlSetState($colourset_sta, $GUI_HIDE)
+					GUICtrlSetState($colourset_statx, $GUI_HIDE)
+					GUICtrlSetState($colourset_cor, $GUI_HIDE)
+					GUICtrlSetState($colourset_cortx, $GUI_HIDE)
+					GUICtrlSetState($colourset_tim, $GUI_HIDE)
+					GUICtrlSetState($colourset_timtx, $GUI_HIDE)
+
+
 				Case $AdvanceCtrl
 					GUICtrlSetState($StandardCtrl, $GUI_UNCHECKED)
 					GUICtrlSetState($AdvanceCtrl, $GUI_CHECKED)
@@ -681,12 +810,20 @@ Func main()
 					GUICtrlSetState($Radio5_5, $GUI_SHOW)
 					GUICtrlSetState($InputBox_5, $GUI_SHOW)
 					GUICtrlSetState($Slider_5, $GUI_SHOW)
+					GUICtrlSetState($colourset_max, $GUI_SHOW)
+					GUICtrlSetState($colourset_maxtx, $GUI_SHOW)
+					GUICtrlSetState($colourset_sta, $GUI_SHOW)
+					GUICtrlSetState($colourset_statx, $GUI_SHOW)
+					GUICtrlSetState($colourset_cor, $GUI_SHOW)
+					GUICtrlSetState($colourset_cortx, $GUI_SHOW)
+					GUICtrlSetState($colourset_tim, $GUI_SHOW)
+					GUICtrlSetState($colourset_timtx, $GUI_SHOW)
 
 					;DrawElements()
 
 				Case $btauto
 
-					 Opt("MouseCoordMode", 0)
+					Opt("MouseCoordMode", 0)
 					Send("#r")
 					Sleep(500)
 					Send("ms-settings:colors{ENTER}")
@@ -711,8 +848,8 @@ Func main()
 					;reach down
 					Send("{TAB 9}")
 
-					 ;Setting window to DPI Aware
-				    DllCall("User32.dll", "bool", "SetProcessDPIAware")
+					;Setting window to DPI Aware
+					DllCall("User32.dll", "bool", "SetProcessDPIAware")
 					;move mouse upto the colour
 					MouseMove(560, 865, 0)
 					Sleep(200)
@@ -724,13 +861,13 @@ Func main()
 					;taking focus away from settings as windows prevents screenshots of settings
 					WinActivate("Program Manager")
 
-					Local $sTempFile = _TempFile(@TempDir, "\" & "colour_Sample_", ".jpg", 3)
+					$sTempFile = _TempFile(@TempDir, "\" & "colour_Sample_", ".jpg", 3)
 
 
 					;getting mouse position and taking a screenshot
 					$pos = MouseGetPos()
 					_ScreenCapture_Capture($sTempFile, $pos[0] - 25, $pos[1] - 25, $pos[0] + 25, $pos[1] + 25)
-					GUICtrlSetImage($preview, $sTempFile )
+					GUICtrlSetImage($preview, $sTempFile)
 
 					;Getting Colour Value from the screenshot's 10*10 position
 					$iPosX = 22
@@ -738,30 +875,30 @@ Func main()
 					_GDIPlus_Startup()
 					$hImage = _GDIPlus_ImageLoadFromFile($sTempFile)
 					$colour = Hex(_GDIPlus_BitmapGetPixel($hImage, $iPosX, $iPosY), 6)
-					 GUICtrlSetBkColor($colourout, "0x"&$colour)
-					 GUICtrlSetData($colourtext, $colour)
+					GUICtrlSetBkColor($colourout, "0x" & $colour)
+					GUICtrlSetData($colourtext, $colour)
 					;ShellExecute($sTempFile)
 					;MsgBox(0, "Pixel Color", $colour)
 					_GDIPlus_ImageDispose($hImage)
 					_GDIPlus_ShutDown()
 
-					 ProcessClose("SystemSettings.exe")
-					 ProcessWaitClose("SystemSettings.exe")
+					ProcessClose("SystemSettings.exe")
+					ProcessWaitClose("SystemSettings.exe")
 
 
-				 Case $bteye
+				Case $bteye
 
-				    Local $sTempFile = _TempFile(@TempDir, "\" & "colour_Sample_", ".jpg", 3)
+					$sTempFile = _TempFile(@TempDir, "\" & "colour_Sample_", ".jpg", 3)
 
 					GUISetState(@SW_MINIMIZE)
 
-					 while 1
-						   If _IsPressed("01") Then
-							  ExitLoop
-						   EndIf
-					 WEnd
+					while 1
+						If _IsPressed("01") Then
+							ExitLoop
+						EndIf
+					WEnd
 
-					 WinActivate("Program Manager")
+					WinActivate("Program Manager")
 
 
 					;getting mouse position and taking a screenshot
@@ -769,7 +906,7 @@ Func main()
 					_ScreenCapture_Capture($sTempFile, $pos[0] - 25, $pos[1] - 25, $pos[0] + 25, $pos[1] + 25)
 					Sleep(1000)
 					GUISetState(@SW_RESTORE)
-					GUICtrlSetImage($preview, $sTempFile )
+					GUICtrlSetImage($preview, $sTempFile)
 
 					;Getting Colour Value from the screenshot's 10*10 position
 					$iPosX = 23
@@ -777,12 +914,151 @@ Func main()
 					_GDIPlus_Startup()
 					$hImage = _GDIPlus_ImageLoadFromFile($sTempFile)
 					$colour = Hex(_GDIPlus_BitmapGetPixel($hImage, $iPosX, $iPosY), 6)
-					GUICtrlSetBkColor($colourout, "0x"&$colour)
+					GUICtrlSetBkColor($colourout, "0x" & $colour)
 					GUICtrlSetData($colourtext, $colour)
 					;ShellExecute($sTempFile)
 					;MsgBox(0, "Pixel Color", $colour)
 					_GDIPlus_ImageDispose($hImage)
 					_GDIPlus_ShutDown()
+
+
+				Case $GUI_EVENT_RESIZED, $GUI_EVENT_MAXIMIZE, $GUI_EVENT_RESTORE
+
+					GUICtrlDelete($taskbarGR)
+					;GUICtrlDelete($check1)
+					GUICtrlDelete($Radio1_1)
+					GUICtrlDelete($Radio1_2)
+					GUICtrlDelete($Radio1_3)
+					GUICtrlDelete($Radio1_4)
+					GUICtrlDelete($Radio1_5)
+					GUICtrlDelete($InputBox_1)
+					GUICtrlDelete($Slider_1)
+
+					GUICtrlDelete($maximisedGR)
+					GUICtrlDelete($check2)
+					GUICtrlDelete($Radio2_1)
+					GUICtrlDelete($Radio2_2)
+					GUICtrlDelete($Radio2_3)
+					GUICtrlDelete($Radio2_4)
+					GUICtrlDelete($Radio2_5)
+					GUICtrlDelete($InputBox_2)
+					GUICtrlDelete($Slider_2)
+
+					GUICtrlDelete($startGR)
+					GUICtrlDelete($check3)
+					GUICtrlDelete($Radio3_1)
+					GUICtrlDelete($Radio3_2)
+					GUICtrlDelete($Radio3_3)
+					GUICtrlDelete($Radio3_4)
+					GUICtrlDelete($Radio3_5)
+					GUICtrlDelete($InputBox_3)
+					GUICtrlDelete($Slider_3)
+
+					GUICtrlDelete($cortanaGR)
+					GUICtrlDelete($check4)
+					GUICtrlDelete($Radio4_1)
+					GUICtrlDelete($Radio4_2)
+					GUICtrlDelete($Radio4_3)
+					GUICtrlDelete($Radio4_4)
+					GUICtrlDelete($Radio4_5)
+					GUICtrlDelete($InputBox_4)
+					GUICtrlDelete($Slider_4)
+
+					GUICtrlDelete($timelineGR)
+					GUICtrlDelete($check5)
+					GUICtrlDelete($Radio5_1)
+					GUICtrlDelete($Radio5_2)
+					GUICtrlDelete($Radio5_3)
+					GUICtrlDelete($Radio5_4)
+					GUICtrlDelete($Radio5_5)
+					GUICtrlDelete($InputBox_5)
+					GUICtrlDelete($Slider_5)
+
+
+					GUICtrlDelete($separate)
+					GUICtrlDelete($separate2)
+					GUICtrlDelete($StandardCtrl)
+					GUICtrlDelete($AdvanceCtrl)
+					GUICtrlDelete($paletteGR)
+					GUICtrlDelete($btauto)
+					GUICtrlDelete($bteye)
+					GUICtrlDelete($btpick)
+
+					GUICtrlDelete($preview)
+					GUICtrlDelete($arrow)
+					GUICtrlDelete($colourout)
+					GUICtrlDelete($arrow2)
+					GUICtrlDelete($hexsym)
+					GUICtrlDelete($colourtext)
+
+					GUICtrlDelete($applyGR)
+					GUICtrlDelete($colourset_tas)
+					GUICtrlDelete($colourset_tastx)
+					GUICtrlDelete($colourset_max)
+					GUICtrlDelete($colourset_maxtx)
+					GUICtrlDelete($colourset_sta)
+					GUICtrlDelete($colourset_statx)
+					GUICtrlDelete($colourset_cor)
+					GUICtrlDelete($colourset_cortx)
+					GUICtrlDelete($colourset_tim)
+					GUICtrlDelete($colourset_timtx)
+
+					GUICtrlDelete($peekGR)
+					GUICtrlDelete($peekdynamic)
+					GUICtrlDelete($peekshow)
+					GUICtrlDelete($peekhide)
+					GUICtrlDelete($peekmain)
+					GUICtrlDelete($peekmainyes)
+					GUICtrlDelete($peekmainno)
+
+
+					GUICtrlDelete($extrasGR)
+					GUICtrlDelete($sleeptime)
+					GUICtrlDelete($sleeptime_tx)
+					GUICtrlDelete($systemtray)
+					GUICtrlDelete($trayyes)
+					GUICtrlDelete($trayno)
+					GUICtrlDelete($logging)
+					GUICtrlDelete($loggingyes)
+					GUICtrlDelete($loggingno)
+
+					GUICtrlDelete($finalload)
+					GUICtrlDelete($finalpreview)
+					GUICtrlDelete($finalsave)
+
+
+
+
+					DrawElements()
+
+
+
+
+
+
+
+
+				Case $btpick
+					; Load cursor
+					$hInstance = _WinAPI_LoadLibrary(@SystemDir & '\mspaint.exe')
+					$hCursor = DllCall('user32.dll', 'ptr', 'LoadCursor', 'ptr', $hInstance, 'dword', 1204)
+					$hCursor = $hCursor[0]
+					_WinAPI_FreeLibrary($hInstance)
+					Dim $aPalette[20] = _
+							[0xFFFFFF, 0x000000, 0xC0C0C0, 0x808080, _
+							0xFF0000, 0x800000, 0xFFFF00, 0x808000, _
+							0x00FF00, 0x008000, 0x00FFFF, 0x008080, _
+							0x0000FF, 0x000080, 0xFF00FF, 0x800080, _
+							0xC0DCC0, 0xA6CAF0, 0xFFFBF0, 0xA0A0A4]
+
+					$colour = Hex(_GUIColorPicker_GetColor($btpick), 6)
+					GUICtrlSetBkColor($colourout, "0x" & $colour)
+					GUICtrlSetData($colourtext, $colour)
+
+
+
+
+
 
 			EndSwitch
 
@@ -791,7 +1067,7 @@ Func main()
 
 
 
-			Sleep(60)
+			;Sleep(60)
 
 
 
@@ -911,101 +1187,18 @@ Func main()
 				EndIf
 			EndIf
 
-		EndIf
 
+		EndIf ;minimise/outer click error mitigation endif
 
-
-		If ($n = $GUI_EVENT_RESIZED) Or ($n = $GUI_EVENT_MAXIMIZE) Or ($n = $GUI_EVENT_RESTORE)  Then
-
-
-			GUICtrlDelete($taskbarGR)
-			;GUICtrlDelete($check1)
-			GUICtrlDelete($Radio1_1)
-			GUICtrlDelete($Radio1_2)
-			GUICtrlDelete($Radio1_3)
-			GUICtrlDelete($Radio1_4)
-			GUICtrlDelete($Radio1_5)
-			GUICtrlDelete($InputBox_1)
-			GUICtrlDelete($Slider_1)
-
-			GUICtrlDelete($maximisedGR)
-			GUICtrlDelete($check2)
-			GUICtrlDelete($Radio2_1)
-			GUICtrlDelete($Radio2_2)
-			GUICtrlDelete($Radio2_3)
-			GUICtrlDelete($Radio2_4)
-			GUICtrlDelete($Radio2_5)
-			GUICtrlDelete($InputBox_2)
-			GUICtrlDelete($Slider_2)
-
-			GUICtrlDelete($startGR)
-			GUICtrlDelete($check3)
-			GUICtrlDelete($Radio3_1)
-			GUICtrlDelete($Radio3_2)
-			GUICtrlDelete($Radio3_3)
-			GUICtrlDelete($Radio3_4)
-			GUICtrlDelete($Radio3_5)
-			GUICtrlDelete($InputBox_3)
-			GUICtrlDelete($Slider_3)
-
-			GUICtrlDelete($cortanaGR)
-			GUICtrlDelete($check4)
-			GUICtrlDelete($Radio4_1)
-			GUICtrlDelete($Radio4_2)
-			GUICtrlDelete($Radio4_3)
-			GUICtrlDelete($Radio4_4)
-			GUICtrlDelete($Radio4_5)
-			GUICtrlDelete($InputBox_4)
-			GUICtrlDelete($Slider_4)
-
-			GUICtrlDelete($timelineGR)
-			GUICtrlDelete($check5)
-			GUICtrlDelete($Radio5_1)
-			GUICtrlDelete($Radio5_2)
-			GUICtrlDelete($Radio5_3)
-			GUICtrlDelete($Radio5_4)
-			GUICtrlDelete($Radio5_5)
-			GUICtrlDelete($InputBox_5)
-			GUICtrlDelete($Slider_5)
-
-
-			GUICtrlDelete($separate)
-			GUICtrlDelete($separate2)
-			GUICtrlDelete($StandardCtrl)
-			GUICtrlDelete($AdvanceCtrl)
-			GUICtrlDelete($paletteGR)
-			GUICtrlDelete($btauto)
-			GUICtrlDelete($bteye)
-			GUICtrlDelete($btpick)
-
-			GUICtrlDelete($preview)
-			GUICtrlDelete($arrow)
-			GUICtrlDelete($colourout)
-			GUICtrlDelete($arrow2)
-			GUICtrlDelete($hexsym)
-			GUICtrlDelete($colourtext)
-
-			GUICtrlDelete($applyGR)
-			GUICtrlDelete($colourset_tas)
-			GUICtrlDelete($colourset_tastx)
-			GUICtrlDelete($colourset_max)
-			GUICtrlDelete($colourset_maxtx)
-			GUICtrlDelete($colourset_sta)
-			GUICtrlDelete($colourset_statx)
-			GUICtrlDelete($colourset_cor)
-			GUICtrlDelete($colourset_cortx)
-			GUICtrlDelete($colourset_tim)
-			GUICtrlDelete($colourset_timtx)
+Until $n = $GUI_EVENT_CLOSE
 
 
 
 
 
 
-			DrawElements()
-		EndIf
 
 
-
-	Until $n = $GUI_EVENT_CLOSE
 EndFunc   ;==>main
+
+
