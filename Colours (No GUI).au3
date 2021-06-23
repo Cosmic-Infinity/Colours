@@ -1,5 +1,3 @@
-#AutoIt3Wrapper_Icon="C:\Users\%username%\Desktop\Software Projects\Colours\Icons\Colours Icon new 85.ico" ;optional and should be replaced with new path for icon while compiling
-
 Global $colour = ""
 PickColour()
 ApplyColour($colour)
