@@ -14,7 +14,7 @@
 ;#include <WindowsConstants.au3>
 ;#include <ButtonConstants.au3>
 ;#include <FontConstants.au3>
-#include <StaticConstants.au3> ;for graphic (lines)
+#include <StaticConstants.au3> ;for graphic(lines)
 ;#include <GuiToolTip.au3>
 #include <ScreenCapture.au3> ;Screenshot Library
 #include <GDIPlus.au3> ; ImageProcessing Library
@@ -460,11 +460,11 @@ Func DrawElements()
 	Global $peekmain = GUICtrlCreateLabel("Peek only main ", $size[2] / 1.755, $topLB * 28, $leftLB * 2.5, $topLB * 1.45)
 	GUICtrlSetFont(-1, $leftLB / 5, $FW_EXTRALIGHT, 0, "Candara", 2)
 
-    GUIStartGroup()
-    Global $peekmainyes = GUICtrlCreateRadio("Yes", $size[2] / 1.75, $topLB * 29.3, ($lengthtLB / 9.5))
+	GUIStartGroup()
+	Global $peekmainyes = GUICtrlCreateRadio("Yes", $size[2] / 1.75, $topLB * 29.3, ($lengthtLB / 9.5))
 	GUICtrlSetFont(-1, $leftLB / 5.5, 200, 0, "Candara", 2)
 	GUICtrlSetTip(-1, "Decides whether only the main monitor is considered when dynamic peek is enabled.")
-    Global $peekmainno = GUICtrlCreateRadio("No", $size[2] / 1.61, $topLB * 29.3, ($lengthtLB / 12))
+	Global $peekmainno = GUICtrlCreateRadio("No", $size[2] / 1.61, $topLB * 29.3, ($lengthtLB / 12))
 	GUICtrlSetFont(-1, $leftLB / 5.5, 200, 0, "Candara", 2)
 	GUICtrlSetTip(-1, "Decides whether only the main monitor is considered when dynamic peek is enabled.")
 	GUICtrlSetState($peekmain, $GUI_CHECKED)
@@ -485,14 +485,14 @@ Func DrawElements()
 	GUICtrlSetTip(-1, "Sleep time in milliseconds." & @CRLF & "a shorter time reduces flicker when opening start" & @CRLF & "but results in higher CPU usage." & @CRLF & "Default is 10.")
 
 
-    Global $systemtray = GUICtrlCreateLabel("System Tray icon", $size[2] / 1.42, $topLB * 25, $leftLB * 3, $topLB * 1.3)
+	Global $systemtray = GUICtrlCreateLabel("System Tray icon", $size[2] / 1.42, $topLB * 25, $leftLB * 3, $topLB * 1.3)
 	GUICtrlSetFont(-1, $leftLB / 5, $FW_EXTRALIGHT, 0, "Candara", 2)
 
 	GUIStartGroup()
 	Global $trayyes = GUICtrlCreateRadio("Yes", $size[2] / 1.41, $topLB * 26.25, ($lengthtLB / 10))
 	GUICtrlSetFont(-1, $leftLB / 5.5, 200, 0, "Candara", 2)
 	GUICtrlSetTip(-1, "Show icon in system tray when TranslucentTB is running.")
-    Global $trayno = GUICtrlCreateRadio("No", $size[2] / 1.31, $topLB * 26.25, ($lengthtLB / 10))
+	Global $trayno = GUICtrlCreateRadio("No", $size[2] / 1.31, $topLB * 26.25, ($lengthtLB / 10))
 	GUICtrlSetFont(-1, $leftLB / 5.5, 200, 0, "Candara", 2)
 	GUICtrlSetTip(-1, "No icon in system tray when TranslucentTB is running.")
 
@@ -503,7 +503,7 @@ Func DrawElements()
 	Global $loggingyes = GUICtrlCreateRadio("Yes", $size[2] / 1.41, $topLB * 29.25, ($lengthtLB / 10))
 	GUICtrlSetFont(-1, $leftLB / 5.5, 200, 0, "Candara", 2)
 	GUICtrlSetTip(-1, "More informative logging. Can make huge log files.")
-    Global $loggingno = GUICtrlCreateRadio("No", $size[2] / 1.31, $topLB * 29.25, ($lengthtLB / 10))
+	Global $loggingno = GUICtrlCreateRadio("No", $size[2] / 1.31, $topLB * 29.25, ($lengthtLB / 10))
 	GUICtrlSetFont(-1, $leftLB / 5.5, 200, 0, "Candara", 2)
 	GUICtrlSetTip(-1, "more informative logging. Can make huge log files.")
 
@@ -511,21 +511,21 @@ Func DrawElements()
 	GUICtrlSetState($trayyes, $GUI_CHECKED)
 
 
-    GUICtrlSetState($loggingno, $GUI_CHECKED)
+	GUICtrlSetState($loggingno, $GUI_CHECKED)
 
 
 
-;---------------------------------------------------final buttons---------------------------------------------------------
+	;---------------------------------------------------final buttons---------------------------------------------------------
 
-   Global $finalload = GUICtrlCreateButton("Load", $size[2] / 1.17, $topLB * 23, $leftLB * 3, $topLB * 1.5)
+	Global $finalload = GUICtrlCreateButton("Load", $size[2] / 1.17, $topLB * 23, $leftLB * 3, $topLB * 1.5)
 	GUICtrlSetFont(-1, $leftLB / 5, $FW_EXTRALIGHT, 0, "Segoe UI", 2)
 	GUICtrlSetTip(-1, "Load current TranslucentTB Settings", "", 1, BitOR(1, 2))  ;& @CRLF & "ALLOW SOME SECONDS to open setting and detect current colour"
 
-Global $finalpreview = GUICtrlCreateButton("Preview", $size[2] / 1.17, $topLB * 25.5, $leftLB * 3, $topLB * 1.5)
+	Global $finalpreview = GUICtrlCreateButton("Preview", $size[2] / 1.17, $topLB * 25.5, $leftLB * 3, $topLB * 1.5)
 	GUICtrlSetFont(-1, $leftLB / 5, $FW_EXTRALIGHT, 0, "Segoe UI", 2)
 	GUICtrlSetTip(-1, "Apply current settings to preview", "", 1, BitOR(1, 2))  ;& @CRLF & "ALLOW SOME SECONDS to open setting and detect current colour"
 
-Global $finalsave = GUICtrlCreateButton("Save", $size[2] / 1.17, $topLB * 28, $leftLB * 3, $topLB * 1.5)
+	Global $finalsave = GUICtrlCreateButton("Save", $size[2] / 1.17, $topLB * 28, $leftLB * 3, $topLB * 1.5)
 	GUICtrlSetFont(-1, $leftLB / 5, $FW_EXTRALIGHT, 0, "Segoe UI", 2)
 	GUICtrlSetTip(-1, "Apply and Save current settings.", "", 1, BitOR(1, 2))  ;& @CRLF & "ALLOW SOME SECONDS to open setting and detect current colour"
 
@@ -1190,7 +1190,7 @@ Func main()
 
 		EndIf ;minimise/outer click error mitigation endif
 
-Until $n = $GUI_EVENT_CLOSE
+	Until $n = $GUI_EVENT_CLOSE
 
 
 
