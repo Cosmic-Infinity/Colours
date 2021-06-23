@@ -37,7 +37,7 @@ Because TranslucentTB has it's limitations.
  <img width="269" alt="Annotation 2021-05-21 230340" src="https://user-images.githubusercontent.com/64971616/119176499-cd713880-ba88-11eb-87bc-126cb9d7ddd7.png">
  
   And then you change the wallpaper to, say, something Blue. TranslucentTB CANNOT change the taskbar colour automaticlly, unlike native Windows where you can you leave the "Automatically pick an accent colour from my background" and forget about it.
-  For doing so with TranslucentTB you'll have to manually look for a colour of your choice/choose from windows perssonalization colour palette, THEN find the HEX value of that colour _(good luck finding hex of a random colour on screen XD)_, and THEN manually input that in every colour field of the TranslucentTB config file.
+  For doing so with TranslucentTB you'll have to manually look for a colour of your choice/choose from windows perssonalization colour palette, THEN find the HEX value of that colour, and THEN manually input that in every colour field of the TranslucentTB config file.
   
  <img width="328" alt="Annotation 2021-05-21 230624" src="https://user-images.githubusercontent.com/64971616/119176830-2f31a280-ba89-11eb-924f-fdb5144aa836.png">
   Doing that is a huge waste of time.
@@ -52,11 +52,11 @@ Because TranslucentTB has it's limitations.
   
   Well, there are, when you're dealing with computers. Here's what "Colours" does
   
-  ◦ Opens settings and checks for windows recommended colour for current wallpaper.
+  ◦ Opens settings and checks for currently selected.
   
   ◦ Takes the HEX of that colour.
   
-  ◦ Open the TranslucentTB config file and replaces the colour values so that the new colour is refected.
+  ◦ Open the TranslucentTB config file and update to the new colour.
   
   ◦ Restart TranslucentTB for changes to take effect.
   
