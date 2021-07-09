@@ -3,10 +3,10 @@
  AutoIt Version: 3.3.14.5
  Author:         Cosmic-Infinity
 
- Script Function:
-	Template AutoIt script.
+
 
 #ce ----------------------------------------------------------------------------
+
 
 #include <GUIConstantsEx.au3>
 ;#include <MsgBoxConstants.au3>
@@ -14,47 +14,81 @@
 ;#include <WindowsConstants.au3>
 ;#include <ButtonConstants.au3>
 ;#include <FontConstants.au3>
-#include <StaticConstants.au3> ;for graphic(lines)
+#include <StaticConstants.au3> ; for graphic(lines)
 ;#include <GuiToolTip.au3>
-#include <ScreenCapture.au3> ;Screenshot Library
+#include <ScreenCapture.au3> ; Screenshot Library
 #include <GDIPlus.au3> ; ImageProcessing Library
 #include <File.au3> ; temporary file name generation library
 #include <Misc.au3> ; mouse click detection and font styles
-
-#Include <ColorPicker.au3>
+#Include <ColorPicker.au3> ; colour picker udf
 ;#Include <WinAPI.au3>
-
 #include <GuiEdit.au3>
+;#include <StringConstants.au3> ;for string constants
 
 
 
 
-#AutoIt3Wrapper_Icon="C:\Users\Shubham\Desktop\Software Projects\Colours\Icons\Colours Icon new 85.ico"
+#AutoIt3Wrapper_Icon="C:\Users\Shubham\Documents\GitHub\Colours\assets\Colours-Icon-new-85.ico" ;optional
 
 ;!Highly recommended for improved overall performance and responsiveness of the GUI effects etc.! (after compiling):
 #AutoIt3Wrapper_Run_Au3Stripper=y
 #Au3Stripper_Parameters=/so /rm /pe
-
-;Required if you want High DPI scaling enabled. (Also requries _Metro_EnableHighDPIScaling())
+;Required if you want High DPI scaling enabled.
 #AutoIt3Wrapper_Res_HiDpi=y
-#include-once
+
 
 
 ;Control temporary state /  reading file state on launch
-Global $stateSD[5] ;stores slider values. index corresponds to slider Number
-Global $stateCB[6] ;stores checkbox selected. 1-4 are checkbox 2-5, 5-6 are advance & standard sliders
+Global $max
 
 
-Global $sTempFile
-Global $colour = "FFFFFF"
+Global $stateCB[5]                     ;stores checkbox selected. 0-3 are checkbox. 4 is advance & standard box
+$stateCB[0] = False
+$stateCB[1] = True
+$stateCB[2] = False
+$stateCB[3] = True
+$stateCB[4] = False
+
+Global $stateRB[5]                    ;stores radio button states for each category
+$stateRB[0] = 1
+$stateRB[1] = 2
+$stateRB[2] = 3
+$stateRB[3] = 4
+$stateRB[4] = 5
+
+Global $stateBLUR[5]                      ;stores current blur value
+$stateBLUR[0] = 10
+$stateBLUR[1] = 20
+$stateBLUR[2] = 30
+$stateBLUR[3] = 40
+$stateBLUR[4] = 50
+
+Global $colourset[5]                    ;stores current colour for each element
+$colourset[0] = ""
+$colourset[1] = ""
+$colourset[2] = ""
+$colourset[3] = ""
+$colourset[4] = ""
+
+Global $stateextra[5]
+$stateextra[0] = 1
+$stateextra[1] = 1
+$stateextra[2] = 69
+$stateextra[3] = 1
+$stateextra[4] = 1
 
 
-
+Global $sTempFile                      ;trmporary file to save image file use for eye button
+Global $colour = "FFFFFF"             ;detected/extracted/selected colour
 
 
 Global $iScale = RegRead("HKCU\Control Panel\Desktop\WindowMetrics", "AppliedDPI") / 96
 ;$iScale=$iScale/1.5 ;scale correction relative to my display's scaling
-Global $old_value = 10
+
+
+
+
+
 DrawWin()
 DrawElements()
 main()
@@ -66,16 +100,13 @@ Func DrawWin()
 
 	Global $gui = GUICreate("Colours GUI", @DesktopWidth / 1.28, @DesktopHeight / 1.2855, -1, -1, BitOR($WS_SYSMENU, $WS_MINIMIZEBOX, $WS_SIZEBOX, $WS_MAXIMIZEBOX))
 	;1500, 840
-	GUISetIcon("C:\Users\Shubham\Desktop\Software Projects\Colours\Icons\Colours Icon new 85.ico")
-	;_GUIScrollbars_Generate($gui, 2000, 1000)
-	;_GUIScrollBars_Init ( $gui)
-
+	GUISetIcon("C:\Users\Shubham\Documents\GitHub\Colours\assets\Colours-Icon-new-16.ico")
+	TraySetIcon("C:\Users\Shubham\Documents\GitHub\Colours\assets\Colours-Icon-new-32.ico")
 	GUISetBkColor(0x00FFFFFF) ; will change background color
 
 	;sw enable
 	GUISetState()
 EndFunc   ;==>DrawWin
-
 
 
 
@@ -91,12 +122,10 @@ Func DrawElements()
 	Local $heightLB = $topLB * 5 ;125
 	Local $lengthtLB = $leftLB * 14 ;700
 
+	;------------------------------------------------------------------------------TASKBAR------------------------------------------------------------------------
 
 
 
-
-
-	;----------------------------------TASKBAR--------------------------------------------------
 	Global $taskbarGR = GUICtrlCreateGroup("Desktop / Global Taskbar", $leftLB, $topLB, $lengthtLB, $heightLB)
 	GUICtrlSetFont($taskbarGR, ($topLB / 2), 600, 0, "Segoe UI", 5)
 	;font weight, font attribute, font name, quality
@@ -123,15 +152,42 @@ Func DrawElements()
 	Global $Radio1_5 = GUICtrlCreateRadio("Blur", (($leftLB * 2.3) * 5), ($heightLB) - ($heightLB * 0.46), ($lengthtLB / 6.3))
 	GUICtrlSetFont($Radio1_5, $leftLB / 5, 200, 0, "Candara", 2)
 	GUICtrlSetTip(-1, "Will make the taskbar slightly blurred.")
-	GUICtrlSetState($Radio1_1, $GUI_CHECKED)
+
+
 
 	Global $Slider_1 = GUICtrlCreateSlider(($leftLB * 1.5), ($heightLB) - ($heightLB * 0.2), ($lengthtLB * (5.15 / 6)), $heightLB / 3.3 < 45 ? $heightLB / 3.3 : 45, -1) ;slider 1
 	GUICtrlSetLimit($Slider_1, 255, 0) ; change min/max value,
 	GUICtrlSetTip(-1, "Set transparency level" & @CRLF & "0 = Completely Transparent" & @CRLF & "255 = Completely Opaque")
-	GUICtrlSetData($Slider_1, $old_value) ; set cursor
+	GUICtrlSetData($Slider_1, $stateBLUR[0]) ; set cursor
 
-	Global $InputBox_1 = GUICtrlCreateInput($old_value, ($lengthtLB * 0.99), ($heightLB) - ($heightLB * 0.17), @DesktopWidth / 51, $heightLB / 4.5 < 31 ? $heightLB / 4.5 : 30, $ES_NUMBER) ; ;textbox 1
+	Global $InputBox_1 = GUICtrlCreateInput($stateBLUR[0], ($lengthtLB * 0.99), ($heightLB) - ($heightLB * 0.17), @DesktopWidth / 51, $heightLB / 4.5 < 31 ? $heightLB / 4.5 : 30, $ES_NUMBER) ; ;textbox 1
 	GUICtrlSetLimit(-1, 3) ;-1 means last created control
+
+
+
+
+
+	;$stateRB[0] = 1
+
+
+	if $stateRB[0] = 1 Then
+		GUICtrlSetState($Radio1_1, $GUI_CHECKED)
+	ElseIf $stateRB[0] = 2 Then
+		GUICtrlSetState($Radio1_2, $GUI_CHECKED)
+	ElseIf $stateRB[0] = 3 Then
+		GUICtrlSetState($Radio1_3, $GUI_CHECKED)
+		GUICtrlSetState($Slider_1, $GUI_DISABLE)
+		GUICtrlSetState($InputBox_1, $GUI_DISABLE)
+	ElseIf $stateRB[0] = 4 Then
+		GUICtrlSetState($Radio1_4, $GUI_CHECKED)
+	ElseIf $stateRB[0] = 5 Then
+		GUICtrlSetState($Radio1_5, $GUI_CHECKED)
+	Else
+		MsgBox($MB_ICONWARNING, "Error Reading Value", "Taskbar accent can't be read!" & @CRLF & "Please edit the Config file yourself.")
+	EndIf
+
+
+
 
 
 
@@ -141,6 +197,9 @@ Func DrawElements()
 
 
 	;--------------------Dynamic Windows. State to use when a window is maximised.--------------------------------------------------
+
+
+
 	Global $maximisedGR = GUICtrlCreateGroup("Window Maximised", $leftLB, $topLB * 2 + $heightLB, $lengthtLB, $heightLB)
 	GUICtrlSetFont($maximisedGR, ($topLB / 2.1), 600, 0, "Segoe UI", 5)
 	;clear (default), fluent (only on build 17063 and up), opaque, normal, or blur.
@@ -164,17 +223,51 @@ Func DrawElements()
 	Global $Radio2_5 = GUICtrlCreateRadio("Blur", (($lengthtLB / 6) * 5), $topLB + $heightLB + ($heightLB) - ($heightLB * 0.46), ($lengthtLB / 6.3))
 	GUICtrlSetFont(-1, $leftLB / 5, $FW_EXTRALIGHT, 0, "Candara", 2)
 	GUICtrlSetTip(-1, "Will make the taskbar slightly blurred.")
-	GUICtrlSetState($Radio2_2, $GUI_CHECKED)
+
+
+
 
 	;slider 2
 	Global $Slider_2 = GUICtrlCreateSlider($lengthtLB / 9, $heightLB + $topLB + ($heightLB) - ($heightLB * 0.2), ($lengthtLB * (5.15 / 6)), $heightLB / 3.3 < 45 ? $heightLB / 3.3 : 45, -1)
 	GUICtrlSetLimit($Slider_2, 255, 0) ; change min/max value,
 	GUICtrlSetTip(-1, "Set transparency level" & @CRLF & "0 = Completely Transparent" & @CRLF & "255 = Completely Opaque")
-	GUICtrlSetData($Slider_2, $old_value) ; set cursor
+	GUICtrlSetData($Slider_2, $stateBLUR[1]) ; set cursor
 	;textbox 2
-	Global $InputBox_2 = GUICtrlCreateInput($old_value, ($lengthtLB * 0.99), $topLB + $heightLB + ($heightLB) - ($heightLB * 0.17), @DesktopWidth / 51, $heightLB / 4.5 < 31 ? $heightLB / 4.5 : 30, $ES_NUMBER) ; create input box
+	Global $InputBox_2 = GUICtrlCreateInput($stateBLUR[1], ($lengthtLB * 0.99), $topLB + $heightLB + ($heightLB) - ($heightLB * 0.17), @DesktopWidth / 51, $heightLB / 4.5 < 31 ? $heightLB / 4.5 : 30, $ES_NUMBER) ; create input box
 	GUICtrlSetLimit(-1, 3)
 
+	;$stateRB[1] = 2
+
+	if $stateRB[1] = 1 Then
+		GUICtrlSetState($Radio2_1, $GUI_CHECKED)
+	ElseIf $stateRB[1] = 2 Then
+		GUICtrlSetState($Radio2_2, $GUI_CHECKED)
+	ElseIf $stateRB[1] = 3 Then
+		GUICtrlSetState($Radio2_3, $GUI_CHECKED)
+		GUICtrlSetState($Slider_2, $GUI_DISABLE)
+		GUICtrlSetState($InputBox_2, $GUI_DISABLE)
+	ElseIf $stateRB[1] = 4 Then
+		GUICtrlSetState($Radio2_4, $GUI_CHECKED)
+	ElseIf $stateRB[1] = 5 Then
+		GUICtrlSetState($Radio2_5, $GUI_CHECKED)
+	Else
+		MsgBox($MB_ICONWARNING, "Error Reading Value", "Window Maximised accent can't be read!" & @CRLF & "Please edit the Config file yourself.")
+	EndIf
+
+
+	;$stateCB[0] = False
+
+
+	If $stateCB[0] = False Then
+		GUICtrlSetState($check2, $GUI_UNCHECKED)
+		GUICtrlSetState($Radio2_1, $GUI_DISABLE)
+		GUICtrlSetState($Radio2_2, $GUI_DISABLE)
+		GUICtrlSetState($Radio2_3, $GUI_DISABLE)
+		GUICtrlSetState($Radio2_4, $GUI_DISABLE)
+		GUICtrlSetState($Radio2_5, $GUI_DISABLE)
+		GUICtrlSetState($Slider_2, $GUI_DISABLE)
+		GUICtrlSetState($InputBox_2, $GUI_DISABLE)
+	EndIf
 
 
 
@@ -182,6 +275,9 @@ Func DrawElements()
 
 
 	;------------------Dynamic Start. State to use when the start menu is opened.-------------------------------------------------------------------
+
+
+
 	Global $startGR = GUICtrlCreateGroup("Start Menu Open", $leftLB, ($topLB * 3) + ($heightLB * 2), $lengthtLB, $heightLB)
 	GUICtrlSetFont($startGR, ($topLB / 2.1), 600, 0, "Segoe UI", 5)
 	;clear (default), fluent (only on build 17063 and up), opaque, normal, or blur.
@@ -205,22 +301,57 @@ Func DrawElements()
 	Global $Radio3_5 = GUICtrlCreateRadio("Blur", ($lengthtLB / 6) * 5, ($topLB * 2) + ($heightLB * 2) + ($heightLB) - ($heightLB * 0.46), ($lengthtLB / 6.3))
 	GUICtrlSetFont(-1, $leftLB / 5, $FW_EXTRALIGHT, 0, "Candara", 2)
 	GUICtrlSetTip(-1, "Will make the taskbar slightly blurred.")
-	GUICtrlSetState($Radio3_3, $GUI_CHECKED)
+
 
 
 	Global $Slider_3 = GUICtrlCreateSlider($lengthtLB / 9, ($topLB * 2) + ($heightLB * 2) + ($heightLB) - ($heightLB * 0.2), ($lengthtLB * (5.15 / 6)), $heightLB / 3.3 < 45 ? $heightLB / 3.3 : 45, -1) ;slider 3
 	GUICtrlSetLimit($Slider_3, 255, 0) ; change min/max value,
 	GUICtrlSetTip(-1, "Set transparency level" & @CRLF & "0 = Completely Transparent" & @CRLF & "255 = Completely Opaque")
-	GUICtrlSetData($Slider_3, $old_value) ; set cursor
+	GUICtrlSetData($Slider_3, $stateBLUR[2]) ; set cursor
 
-	Global $InputBox_3 = GUICtrlCreateInput($old_value, ($lengthtLB * 0.99), ($topLB * 2) + ($heightLB * 2) + ($heightLB) - ($heightLB * 0.17), @DesktopWidth / 51, $heightLB / 4.5 < 31 ? $heightLB / 4.5 : 30, $ES_NUMBER) ;textbox 3
+	Global $InputBox_3 = GUICtrlCreateInput($stateBLUR[2], ($lengthtLB * 0.99), ($topLB * 2) + ($heightLB * 2) + ($heightLB) - ($heightLB * 0.17), @DesktopWidth / 51, $heightLB / 4.5 < 31 ? $heightLB / 4.5 : 30, $ES_NUMBER) ;textbox 3
 	GUICtrlSetLimit(-1, 3)
 
+	;$stateRB[2] = 3
+
+	if $stateRB[2] = 1 Then
+		GUICtrlSetState($Radio3_1, $GUI_CHECKED)
+	ElseIf $stateRB[2] = 2 Then
+		GUICtrlSetState($Radio3_2, $GUI_CHECKED)
+	ElseIf $stateRB[2] = 3 Then
+		GUICtrlSetState($Radio3_3, $GUI_CHECKED)
+		GUICtrlSetState($Slider_3, $GUI_DISABLE)
+		GUICtrlSetState($InputBox_3, $GUI_DISABLE)
+	ElseIf $stateRB[2] = 4 Then
+		GUICtrlSetState($Radio3_4, $GUI_CHECKED)
+	ElseIf $stateRB[2] = 5 Then
+		GUICtrlSetState($Radio3_5, $GUI_CHECKED)
+	Else
+		MsgBox($MB_ICONWARNING, "Error Reading Value", "Start accent can't be read!" & @CRLF & "Please edit the Config file yourself.")
+	EndIf
+
+
+	;$stateCB[1] = False
+
+
+	If $stateCB[1] = False Then
+		GUICtrlSetState($check3, $GUI_UNCHECKED)
+		GUICtrlSetState($Radio3_1, $GUI_DISABLE)
+		GUICtrlSetState($Radio3_2, $GUI_DISABLE)
+		GUICtrlSetState($Radio3_3, $GUI_DISABLE)
+		GUICtrlSetState($Radio3_4, $GUI_DISABLE)
+		GUICtrlSetState($Radio3_5, $GUI_DISABLE)
+		GUICtrlSetState($Slider_3, $GUI_DISABLE)
+		GUICtrlSetState($InputBox_3, $GUI_DISABLE)
+	EndIf
 
 
 
 
 	;-------------------Dynamic Cortana. State to use when Cortana or the search menu is opened.----------------------------------------------------------------------
+
+
+
 	Global $cortanaGR = GUICtrlCreateGroup("Cortana Open", $leftLB, ($topLB * 4) + ($heightLB * 3), $lengthtLB, $heightLB)
 	GUICtrlSetFont($cortanaGR, ($topLB / 2.1), 600, 0, "Segoe UI", 5)
 	;clear (default), fluent (only on build 17063 and up), opaque, normal, or blur.
@@ -244,24 +375,59 @@ Func DrawElements()
 	Global $Radio4_5 = GUICtrlCreateRadio("Blur", ($lengthtLB / 6) * 5, ($topLB * 3) + ($heightLB * 3) + ($heightLB) - ($heightLB * 0.46), ($lengthtLB / 6.3))
 	GUICtrlSetFont(-1, $leftLB / 5, $FW_EXTRALIGHT, 0, "Candara", 2)
 	GUICtrlSetTip(-1, "Will make the taskbar slightly blurred.")
-	GUICtrlSetState($Radio4_4, $GUI_CHECKED)
+
+
 
 
 	Global $Slider_4 = GUICtrlCreateSlider($lengthtLB / 9, ($topLB * 3) + ($heightLB * 3) + ($heightLB) - ($heightLB * 0.2), ($lengthtLB * (5.15 / 6)), $heightLB / 3.3 < 45 ? $heightLB / 3.3 : 45, -1) ;slider 4
 	GUICtrlSetLimit($Slider_4, 255, 0) ; change min/max value,
 	GUICtrlSetTip(-1, "Set transparency level" & @CRLF & "0 = Completely Transparent" & @CRLF & "255 = Completely Opaque")
-	GUICtrlSetData($Slider_4, $old_value) ; set cursor
+	GUICtrlSetData($Slider_4, $stateBLUR[3]) ; set cursor
 
-	Global $InputBox_4 = GUICtrlCreateInput($old_value, ($lengthtLB * 0.99), ($topLB * 3) + ($heightLB * 3) + ($heightLB) - ($heightLB * 0.17), @DesktopWidth / 51, $heightLB / 4.5 < 31 ? $heightLB / 4.5 : 30, $ES_NUMBER) ;textbox 4
+	Global $InputBox_4 = GUICtrlCreateInput($stateBLUR[3], ($lengthtLB * 0.99), ($topLB * 3) + ($heightLB * 3) + ($heightLB) - ($heightLB * 0.17), @DesktopWidth / 51, $heightLB / 4.5 < 31 ? $heightLB / 4.5 : 30, $ES_NUMBER) ;textbox 4
 	GUICtrlSetLimit(-1, 3)
 
 
+	;$stateRB[3] = 4
 
+	if $stateRB[3] = 1 Then
+		GUICtrlSetState($Radio4_1, $GUI_CHECKED)
+	ElseIf $stateRB[3] = 2 Then
+		GUICtrlSetState($Radio4_2, $GUI_CHECKED)
+	ElseIf $stateRB[3] = 3 Then
+		GUICtrlSetState($Radio4_3, $GUI_CHECKED)
+		GUICtrlSetState($Slider_4, $GUI_DISABLE)
+		GUICtrlSetState($InputBox_4, $GUI_DISABLE)
+	ElseIf $stateRB[3] = 4 Then
+		GUICtrlSetState($Radio4_4, $GUI_CHECKED)
+	ElseIf $stateRB[2] = 5 Then
+		GUICtrlSetState($Radio4_5, $GUI_CHECKED)
+	Else
+		MsgBox($MB_ICONWARNING, "Error Reading Value", "Cortana menu accent can't be read!" & @CRLF & "Please edit the Config file yourself.")
+	EndIf
+
+
+	;$stateCB[2] = False
+
+
+	If $stateCB[2] = False Then
+		GUICtrlSetState($check4, $GUI_UNCHECKED)
+		GUICtrlSetState($Radio4_1, $GUI_DISABLE)
+		GUICtrlSetState($Radio4_2, $GUI_DISABLE)
+		GUICtrlSetState($Radio4_3, $GUI_DISABLE)
+		GUICtrlSetState($Radio4_4, $GUI_DISABLE)
+		GUICtrlSetState($Radio4_5, $GUI_DISABLE)
+		GUICtrlSetState($Slider_4, $GUI_DISABLE)
+		GUICtrlSetState($InputBox_4, $GUI_DISABLE)
+	EndIf
 
 
 
 
 	;------------------Dynamic Timeline. State to use when the timeline (or task view on older builds) is opened.---------------------------------------------------------------------------------------
+
+
+
 	Global $timelineGR = GUICtrlCreateGroup("Timeline Open", $leftLB, ($topLB * 5) + ($heightLB * 4), $lengthtLB, $heightLB)
 	GUICtrlSetFont($timelineGR, ($topLB / 2.1), 600, 0, "Segoe UI", 5)
 	;clear (default), fluent (only on build 17063 and up), opaque, normal, or blur.
@@ -285,16 +451,54 @@ Func DrawElements()
 	Global $Radio5_5 = GUICtrlCreateRadio("Blur", ($lengthtLB / 6) * 5, ($topLB * 4) + ($heightLB * 4) + ($heightLB) - ($heightLB * 0.46), ($lengthtLB / 6))
 	GUICtrlSetFont(-1, $leftLB / 5, $FW_EXTRALIGHT, 0, "Candara", 2)
 	GUICtrlSetTip(-1, "Will make the taskbar slightly blurred.")
-	GUICtrlSetState($Radio5_5, $GUI_CHECKED)
+
+
 
 
 	Global $Slider_5 = GUICtrlCreateSlider($lengthtLB / 9, ($topLB * 4) + ($heightLB * 4) + ($heightLB) - ($heightLB * 0.2), ($lengthtLB * (5.15 / 6)), $heightLB / 3.3 < 45 ? $heightLB / 3.3 : 45, -1) ;slider 5
 	GUICtrlSetLimit($Slider_5, 255, 0) ; change min/max value,
 	GUICtrlSetTip(-1, "Set transparency level" & @CRLF & "0 = Completely Transparent" & @CRLF & "255 = Completely Opaque")
-	GUICtrlSetData($Slider_5, $old_value) ; set cursor
+	GUICtrlSetData($Slider_5, $stateBLUR[4]) ; set cursor
 
-	Global $InputBox_5 = GUICtrlCreateInput($old_value, ($lengthtLB * 0.99), ($topLB * 4) + ($heightLB * 4) + ($heightLB) - ($heightLB * 0.17), @DesktopWidth / 51, $heightLB / 4.5 < 31 ? $heightLB / 4.5 : 30, $ES_NUMBER) ;textbox 5
+	Global $InputBox_5 = GUICtrlCreateInput($stateBLUR[4], ($lengthtLB * 0.99), ($topLB * 4) + ($heightLB * 4) + ($heightLB) - ($heightLB * 0.17), @DesktopWidth / 51, $heightLB / 4.5 < 31 ? $heightLB / 4.5 : 30, $ES_NUMBER) ;textbox 5
 	GUICtrlSetLimit(-1, 3)
+
+	;$stateRB[4] = 5
+
+	if $stateRB[4] = 1 Then
+		GUICtrlSetState($Radio5_1, $GUI_CHECKED)
+	ElseIf $stateRB[4] = 2 Then
+		GUICtrlSetState($Radio5_2, $GUI_CHECKED)
+	ElseIf $stateRB[4] = 3 Then
+		GUICtrlSetState($Radio5_3, $GUI_CHECKED)
+		GUICtrlSetState($Slider_5, $GUI_DISABLE)
+		GUICtrlSetState($InputBox_5, $GUI_DISABLE)
+	ElseIf $stateRB[4] = 4 Then
+		GUICtrlSetState($Radio5_4, $GUI_CHECKED)
+	ElseIf $stateRB[4] = 5 Then
+		GUICtrlSetState($Radio5_5, $GUI_CHECKED)
+	Else
+		MsgBox($MB_ICONWARNING, "Error Reading Value", "Timeline accent can't be read!" & @CRLF & "Please edit the Config file yourself.")
+	EndIf
+
+
+	;$stateCB[3] = False
+
+
+	If $stateCB[3] = False Then
+		GUICtrlSetState($check5, $GUI_UNCHECKED)
+		GUICtrlSetState($Radio5_1, $GUI_DISABLE)
+		GUICtrlSetState($Radio5_2, $GUI_DISABLE)
+		GUICtrlSetState($Radio5_3, $GUI_DISABLE)
+		GUICtrlSetState($Radio5_4, $GUI_DISABLE)
+		GUICtrlSetState($Radio5_5, $GUI_DISABLE)
+		GUICtrlSetState($Slider_5, $GUI_DISABLE)
+		GUICtrlSetState($InputBox_5, $GUI_DISABLE)
+	EndIf
+
+
+
+
 
 
 
@@ -317,6 +521,8 @@ Func DrawElements()
 
 
 
+
+
 	;----------------------------------------------------colour palette------------------------------------------------------------
 
 
@@ -330,12 +536,14 @@ Func DrawElements()
 	GUICtrlSetTip(-1, "Autodetect currently selected colour in Windows Settings." & @CRLF & "DO NOT move the mouse for a few seconds after clicking this.", "Aotodetect", 1, BitOR(1, 2))  ;& @CRLF & "ALLOW SOME SECONDS to open setting and detect current colour"
 	Global $bteye = GUICtrlCreateButton("EyeDropper", $size[2] / 1.42, $topLB * 7, $leftLB * 3, $topLB * 1.3)
 	GUICtrlSetFont(-1, $leftLB / 5, $FW_EXTRALIGHT, 0, "Candara", 2)
-	GUICtrlSetTip(-1, "Turns the mouse into an Eyedropper" & @CRLF & "allowing selection of any colour from UI.", "Eyedropper", 1, BitOR(1, 2)) ;@CRLF & "Samples 2 pixels diagonally above the mouse pointer."
+	GUICtrlSetTip(-1, "Turns the mouse into an Eyedropper" & @CRLF & "allowing selection of any colour from UI." & @CRLF & "NOTE : Temporarily hides this Window till colour selection.", "Eyedropper", 1, BitOR(1, 2)) ;@CRLF & "Samples 2 pixels diagonally above the mouse pointer."
 
-	Global $btpick = _GUIColorPicker_Create("Colour Picker", $size[2] / 1.21, $topLB * 7, $leftLB * 3, $topLB * 1.3, 0xFF00FF, BitOR($CP_FLAG_CHOOSERBUTTON, $CP_FLAG_ARROWSTYLE, $CP_FLAG_MOUSEWHEEL), '', 4, 5, 0, '', 'More...')
+; Create Picker1 with custom cursor
+	Global $btpick = _GUIColorPicker_Create("Colour Picker", $size[2] / 1.21, $topLB * 7, $leftLB * 3, $topLB * 1.3, "0x" & $colour, BitOR($CP_FLAG_CHOOSERBUTTON, $CP_FLAG_ARROWSTYLE, $CP_FLAG_MOUSEWHEEL), '', 0, -1, -1, 'Pick a Colour', 'More')
 
 	GUICtrlSetFont(-1, $leftLB / 5, $FW_EXTRALIGHT, 0, "Candara", 2)
 	GUICtrlSetTip(-1, "Choose from a colour palette", "Colour Picker", 1, BitOR(1, 2))
+
 
 
 
@@ -361,7 +569,7 @@ Func DrawElements()
 
 	Global $hexsym = GUICtrlCreateLabel("0x", $size[2] / 1.23, $topLB * 9.9)
 	GUICtrlSetFont(-1, $leftLB / 5, $FW_EXTRALIGHT, 0, "Segoe UI", 2)
-	Global $colourtext = GUICtrlCreateInput("", $size[2] / 1.2, $topLB * 9.8, $leftLB * 2, $topLB * 1.45)
+	Global $colourtext = GUICtrlCreateInput($colour, $size[2] / 1.2, $topLB * 9.8, $leftLB * 2, $topLB * 1.45)
 	GUICtrlSetLimit(-1, 6)
 	GUICtrlSetFont(-1, $leftLB / 5, $FW_EXTRALIGHT, 0, "Segoe UI", 2)
 	GUICtrlSetTip(-1, "HEX value of the colour.", "Colour Hex Viewer", 0, BitOR(1, 1))
@@ -394,6 +602,7 @@ Func DrawElements()
 	Global $colourset_tastx = GUICtrlCreateInput("", $size[2] / 1.54, $topLB * 14.7, $leftLB * 2.0, $topLB * 1.45)
 	GUICtrlSetLimit(-1, 6)
 	_GUICtrlEdit_SetCueBanner(-1, "0x")
+	GUICtrlSetData($colourset_tastx, $colourset[0])
 	GUICtrlSetFont(-1, $leftLB / 5.5, $FW_EXTRALIGHT, 0, "Segoe UI", 2)
 	GUICtrlSetTip(-1, "Colour for taskbar on Desktop.")
 
@@ -403,6 +612,7 @@ Func DrawElements()
 	Global $colourset_maxtx = GUICtrlCreateInput("", $size[2] / 1.184, $topLB * 14.7, $leftLB * 2.0, $topLB * 1.45)
 	GUICtrlSetLimit(-1, 6)
 	_GUICtrlEdit_SetCueBanner(-1, "0x")
+	GUICtrlSetData($colourset_maxtx, $colourset[1])
 	GUICtrlSetFont(-1, $leftLB / 5.5, $FW_EXTRALIGHT, 0, "Segoe UI", 2)
 	GUICtrlSetTip(-1, "Colour for taskbar during fullscreen.")
 
@@ -411,6 +621,7 @@ Func DrawElements()
 	Global $colourset_statx = GUICtrlCreateInput("", $size[2] / 1.54, $topLB * 16.7, $leftLB * 2.0, $topLB * 1.45)
 	GUICtrlSetLimit(-1, 6)
 	_GUICtrlEdit_SetCueBanner(-1, "0x")
+	GUICtrlSetData($colourset_statx, $colourset[2])
 	GUICtrlSetFont(-1, $leftLB / 5.5, $FW_EXTRALIGHT, 0, "Segoe UI", 2)
 	GUICtrlSetTip(-1, "Colour for taskbar during Start")
 
@@ -420,6 +631,7 @@ Func DrawElements()
 	Global $colourset_cortx = GUICtrlCreateInput("", $size[2] / 1.184, $topLB * 16.7, $leftLB * 2.0, $topLB * 1.45)
 	GUICtrlSetLimit(-1, 6)
 	_GUICtrlEdit_SetCueBanner(-1, "0x")
+	GUICtrlSetData($colourset_cortx, $colourset[3])
 	GUICtrlSetFont(-1, $leftLB / 5.5, $FW_EXTRALIGHT, 0, "Segoe UI", 2)
 	GUICtrlSetTip(-1, "Colour for taskbar during Cortana.")
 
@@ -428,6 +640,7 @@ Func DrawElements()
 	Global $colourset_timtx = GUICtrlCreateInput("", $size[2] / 1.54, $topLB * 18.7, $leftLB * 2.0, $topLB * 1.45)
 	GUICtrlSetLimit(-1, 6)
 	_GUICtrlEdit_SetCueBanner(-1, "0x")
+	GUICtrlSetData($colourset_timtx, $colourset[4])
 	GUICtrlSetFont(-1, $leftLB / 5.5, $FW_EXTRALIGHT, 0, "Segoe UI", 2)
 	GUICtrlSetTip(-1, "Colour for taskbar wne Timeline open.")
 
@@ -454,7 +667,16 @@ Func DrawElements()
 	Global $peekhide = GUICtrlCreateRadio("Hide", $size[2] / 1.73, $topLB * 26.3, ($lengthtLB / 6.3))
 	GUICtrlSetFont(-1, $leftLB / 5, 200, 0, "Candara", 2)
 	GUICtrlSetTip(-1, "Always hidden")
-	GUICtrlSetState($peekshow, $GUI_CHECKED)
+
+	If $stateextra[0] = 1 Then
+		GUICtrlSetState($peekdynamic, $GUI_CHECKED)
+	ElseIf $stateextra[0] = 2 Then
+		GUICtrlSetState($peekshow, $GUI_CHECKED)
+	ElseIf $stateextra[0] = 3 Then
+		GUICtrlSetState($peekhide, $GUI_CHECKED)
+	Else
+		MsgBox($MB_ICONWARNING, "Error Reading Value", "Peek Behaviour Control state can't be read!" & @CRLF & "Please edit the Config file yourself.")
+	EndIf
 
 
 	Global $peekmain = GUICtrlCreateLabel("Peek only main ", $size[2] / 1.755, $topLB * 28, $leftLB * 2.5, $topLB * 1.45)
@@ -469,6 +691,15 @@ Func DrawElements()
 	GUICtrlSetTip(-1, "Decides whether only the main monitor is considered when dynamic peek is enabled.")
 	GUICtrlSetState($peekmain, $GUI_CHECKED)
 
+	If $stateextra[1] = 1 Then
+		GUICtrlSetState($peekmainyes, $GUI_CHECKED)
+	ElseIf $stateextra[1] = 2 Then
+		GUICtrlSetState($peekmainno, $GUI_CHECKED)
+	Else
+		MsgBox($MB_ICONWARNING, "Error Reading Value", "Peek Main Control state can't be read!" & @CRLF & "Please edit the Config file yourself.")
+	EndIf
+
+
 
 
 	;--------------------------------------------------------- extras ----------------------------------------------------------
@@ -480,7 +711,8 @@ Func DrawElements()
 	GUICtrlSetFont(-1, $leftLB / 5, $FW_EXTRALIGHT, 0, "Candara", 2)
 	Global $sleeptime_tx = GUICtrlCreateInput("", $size[2] / 1.293, $topLB * 23, $leftLB * 1.32, $topLB * 1.3)
 	GUICtrlSetLimit(-1, 5)
-	_GUICtrlEdit_SetCueBanner(-1, "000")
+	_GUICtrlEdit_SetCueBanner(-1, "10")
+	GUICtrlSetData($sleeptime_tx, $stateextra[2])
 	GUICtrlSetFont(-1, $leftLB / 5.5, $FW_EXTRALIGHT, 0, "Segoe UI", 2)
 	GUICtrlSetTip(-1, "Sleep time in milliseconds." & @CRLF & "a shorter time reduces flicker when opening start" & @CRLF & "but results in higher CPU usage." & @CRLF & "Default is 10.")
 
@@ -496,6 +728,15 @@ Func DrawElements()
 	GUICtrlSetFont(-1, $leftLB / 5.5, 200, 0, "Candara", 2)
 	GUICtrlSetTip(-1, "No icon in system tray when TranslucentTB is running.")
 
+	if $stateextra[3] = 1 Then
+		GUICtrlSetState($trayyes, $GUI_CHECKED)
+	ElseIf $stateextra[3] = 2 Then
+		GUICtrlSetState($trayno, $GUI_CHECKED)
+	Else
+		MsgBox($MB_ICONWARNING, "Error Reading Value", "System Tray Icon control state can't be read!" & @CRLF & "Please edit the Config file yourself.")
+	EndIf
+
+
 	Global $logging = GUICtrlCreateLabel("Verbose Logging", $size[2] / 1.42, $topLB * 28, $leftLB * 3, $topLB * 1.3)
 	GUICtrlSetFont(-1, $leftLB / 5, $FW_EXTRALIGHT, 0, "Candara", 2)
 
@@ -507,11 +748,16 @@ Func DrawElements()
 	GUICtrlSetFont(-1, $leftLB / 5.5, 200, 0, "Candara", 2)
 	GUICtrlSetTip(-1, "more informative logging. Can make huge log files.")
 
+	if $stateextra[4] = 1 Then
+		GUICtrlSetState($loggingyes, $GUI_CHECKED)
+	ElseIf $stateextra[4] = 2 Then
+		GUICtrlSetState($loggingno, $GUI_CHECKED)
+	Else
+		MsgBox($MB_ICONWARNING, "Error Reading Value", "Logging state control state can't be read!" & @CRLF & "Please edit the Config file yourself.")
+	EndIf
 
-	GUICtrlSetState($trayyes, $GUI_CHECKED)
 
 
-	GUICtrlSetState($loggingno, $GUI_CHECKED)
 
 
 
@@ -523,7 +769,7 @@ Func DrawElements()
 
 	Global $finalpreview = GUICtrlCreateButton("Preview", $size[2] / 1.17, $topLB * 25.5, $leftLB * 3, $topLB * 1.5)
 	GUICtrlSetFont(-1, $leftLB / 5, $FW_EXTRALIGHT, 0, "Segoe UI", 2)
-	GUICtrlSetTip(-1, "Apply current settings to preview", "", 1, BitOR(1, 2))  ;& @CRLF & "ALLOW SOME SECONDS to open setting and detect current colour"
+	GUICtrlSetTip(-1, "Apply current settings and preview", "", 1, BitOR(1, 2))  ;& @CRLF & "ALLOW SOME SECONDS to open setting and detect current colour"
 
 	Global $finalsave = GUICtrlCreateButton("Save", $size[2] / 1.17, $topLB * 28, $leftLB * 3, $topLB * 1.5)
 	GUICtrlSetFont(-1, $leftLB / 5, $FW_EXTRALIGHT, 0, "Segoe UI", 2)
@@ -533,6 +779,22 @@ Func DrawElements()
 
 
 
+	;-----------------------------------------------------hide buttons for standarad controls------------------------------------------------
+
+	;$stateCB[4] = False
+
+	If $stateCB[4] = True Then
+		advancehide()
+
+	ElseIf $stateCB[4] = False Then
+		advanceshow()
+
+	Else
+		MsgBox($MB_ICONWARNING, "Error Reading Value", "Standard/Advance Control state can't be read!" & @CRLF & "Please edit the Config file yourself.")
+
+
+
+	EndIf
 
 
 
@@ -582,7 +844,7 @@ Func main()
 
 
 		If @error Then
-			Sleep(1000)
+
 		Else
 			Switch $n
 
@@ -609,13 +871,31 @@ Func main()
 					EndIf
 				#ce
 
+				Case $Radio1_1
+					GUICtrlSetState($Slider_1, $GUI_ENABLE)
+					GUICtrlSetState($InputBox_1, $GUI_ENABLE)
+					$stateRB[0] = 1
+				Case $Radio1_2
+					GUICtrlSetState($Slider_1, $GUI_ENABLE)
+					GUICtrlSetState($InputBox_1, $GUI_ENABLE)
+					$stateRB[0] = 2
+
 				Case $Radio1_3
 					GUICtrlSetState($Slider_1, $GUI_DISABLE)
 					GUICtrlSetState($InputBox_1, $GUI_DISABLE)
-				Case $Radio1_1, $Radio1_2, $Radio1_4, $Radio1_5
+					$stateRB[0] = 3
+
+				Case $Radio1_4, $Radio1_5
 					GUICtrlSetState($Slider_1, $GUI_ENABLE)
 					GUICtrlSetState($InputBox_1, $GUI_ENABLE)
+					$stateRB[0] = 4
+				Case $Radio1_5
+					GUICtrlSetState($Slider_1, $GUI_ENABLE)
+					GUICtrlSetState($InputBox_1, $GUI_ENABLE)
+					$stateRB[0] = 5
+
 				Case $check2
+
 					If GUICtrlRead($check2) = $GUI_UNCHECKED Then
 						GUICtrlSetState($Radio2_1, $GUI_DISABLE)
 						GUICtrlSetState($Radio2_2, $GUI_DISABLE)
@@ -624,6 +904,7 @@ Func main()
 						GUICtrlSetState($Radio2_5, $GUI_DISABLE)
 						GUICtrlSetState($Slider_2, $GUI_DISABLE)
 						GUICtrlSetState($InputBox_2, $GUI_DISABLE)
+						$stateCB[0] = False
 					ElseIf GUICtrlRead($check2) = $GUI_CHECKED Then
 						GUICtrlSetState($Radio2_1, $GUI_ENABLE)
 						GUICtrlSetState($Radio2_2, $GUI_ENABLE)
@@ -634,15 +915,35 @@ Func main()
 							GUICtrlSetState($Slider_2, $GUI_ENABLE)
 							GUICtrlSetState($InputBox_2, $GUI_ENABLE)
 						EndIf
+						$stateCB[0] = True
 					EndIf
+
+				Case $Radio2_1
+					GUICtrlSetState($Slider_2, $GUI_ENABLE)
+					GUICtrlSetState($InputBox_2, $GUI_ENABLE)
+					$stateRB[1] = 1
+
+				Case $Radio2_2
+					GUICtrlSetState($Slider_2, $GUI_ENABLE)
+					GUICtrlSetState($InputBox_2, $GUI_ENABLE)
+					$stateRB[1] = 2
 
 				Case $Radio2_3
 					GUICtrlSetState($Slider_2, $GUI_DISABLE)
 					GUICtrlSetState($InputBox_2, $GUI_DISABLE)
-				Case $Radio2_1, $Radio2_2, $Radio2_4, $Radio2_5
+					$stateRB[1] = 3
+				Case $Radio2_4
 					GUICtrlSetState($Slider_2, $GUI_ENABLE)
 					GUICtrlSetState($InputBox_2, $GUI_ENABLE)
+					$stateRB[1] = 4
+
+				Case $Radio2_5
+					GUICtrlSetState($Slider_2, $GUI_ENABLE)
+					GUICtrlSetState($InputBox_2, $GUI_ENABLE)
+					$stateRB[1] = 5
+
 				Case $check3
+
 					If GUICtrlRead($check3) = $GUI_UNCHECKED Then
 						GUICtrlSetState($Radio3_1, $GUI_DISABLE)
 						GUICtrlSetState($Radio3_2, $GUI_DISABLE)
@@ -651,6 +952,7 @@ Func main()
 						GUICtrlSetState($Radio3_5, $GUI_DISABLE)
 						GUICtrlSetState($Slider_3, $GUI_DISABLE)
 						GUICtrlSetState($InputBox_3, $GUI_DISABLE)
+						$stateCB[1] = False
 					ElseIf GUICtrlRead($check3) = $GUI_CHECKED Then
 						GUICtrlSetState($Radio3_1, $GUI_ENABLE)
 						GUICtrlSetState($Radio3_2, $GUI_ENABLE)
@@ -661,13 +963,30 @@ Func main()
 							GUICtrlSetState($Slider_3, $GUI_ENABLE)
 							GUICtrlSetState($InputBox_3, $GUI_ENABLE)
 						EndIf
+						$stateCB[1] = True
 					EndIf
+
+				Case $Radio3_1
+					GUICtrlSetState($Slider_3, $GUI_ENABLE)
+					GUICtrlSetState($InputBox_3, $GUI_ENABLE)
+					$stateRB[2] = 1
+				Case $Radio3_2
+					GUICtrlSetState($Slider_3, $GUI_ENABLE)
+					GUICtrlSetState($InputBox_3, $GUI_ENABLE)
+					$stateRB[2] = 2
 				Case $Radio3_3
 					GUICtrlSetState($Slider_3, $GUI_DISABLE)
 					GUICtrlSetState($InputBox_3, $GUI_DISABLE)
-				Case $Radio3_1, $Radio3_2, $Radio3_4, $Radio3_5
+					$stateRB[2] = 3
+				Case $Radio3_4
 					GUICtrlSetState($Slider_3, $GUI_ENABLE)
 					GUICtrlSetState($InputBox_3, $GUI_ENABLE)
+					$stateRB[2] = 4
+				Case $Radio3_5
+					GUICtrlSetState($Slider_3, $GUI_ENABLE)
+					GUICtrlSetState($InputBox_3, $GUI_ENABLE)
+					$stateRB[2] = 5
+
 				Case $check4
 					If GUICtrlRead($check4) = $GUI_UNCHECKED Then
 						GUICtrlSetState($Radio4_1, $GUI_DISABLE)
@@ -677,6 +996,7 @@ Func main()
 						GUICtrlSetState($Radio4_5, $GUI_DISABLE)
 						GUICtrlSetState($Slider_4, $GUI_DISABLE)
 						GUICtrlSetState($InputBox_4, $GUI_DISABLE)
+						$stateCB[2] = False
 					ElseIf GUICtrlRead($check4) = $GUI_CHECKED Then
 						GUICtrlSetState($Radio4_1, $GUI_ENABLE)
 						GUICtrlSetState($Radio4_2, $GUI_ENABLE)
@@ -687,13 +1007,30 @@ Func main()
 							GUICtrlSetState($Slider_4, $GUI_ENABLE)
 							GUICtrlSetState($InputBox_4, $GUI_ENABLE)
 						EndIf
+						$stateCB[2] = True
 					EndIf
+
+				Case $Radio4_1
+					GUICtrlSetState($Slider_4, $GUI_ENABLE)
+					GUICtrlSetState($InputBox_4, $GUI_ENABLE)
+					$stateRB[3] = 1
+				Case $Radio4_2
+					GUICtrlSetState($Slider_4, $GUI_ENABLE)
+					GUICtrlSetState($InputBox_4, $GUI_ENABLE)
+					$stateRB[3] = 2
 				Case $Radio4_3
 					GUICtrlSetState($Slider_4, $GUI_DISABLE)
 					GUICtrlSetState($InputBox_4, $GUI_DISABLE)
-				Case $Radio4_1, $Radio4_2, $Radio4_4, $Radio4_5
+					$stateRB[3] = 3
+				Case $Radio4_4
 					GUICtrlSetState($Slider_4, $GUI_ENABLE)
 					GUICtrlSetState($InputBox_4, $GUI_ENABLE)
+					$stateRB[3] = 4
+				Case $Radio4_5
+					GUICtrlSetState($Slider_4, $GUI_ENABLE)
+					GUICtrlSetState($InputBox_4, $GUI_ENABLE)
+					$stateRB[3] = 5
+
 				Case $check5
 					If GUICtrlRead($check5) = $GUI_UNCHECKED Then
 						GUICtrlSetState($Radio5_1, $GUI_DISABLE)
@@ -703,6 +1040,7 @@ Func main()
 						GUICtrlSetState($Radio5_5, $GUI_DISABLE)
 						GUICtrlSetState($Slider_5, $GUI_DISABLE)
 						GUICtrlSetState($InputBox_5, $GUI_DISABLE)
+						$stateCB[3] = False
 					ElseIf GUICtrlRead($check5) = $GUI_CHECKED Then
 						GUICtrlSetState($Radio5_1, $GUI_ENABLE)
 						GUICtrlSetState($Radio5_2, $GUI_ENABLE)
@@ -713,115 +1051,43 @@ Func main()
 							GUICtrlSetState($Slider_5, $GUI_ENABLE)
 							GUICtrlSetState($InputBox_5, $GUI_ENABLE)
 						EndIf
+						$stateCB[3] = True
 					EndIf
+
+				Case $Radio5_1
+					GUICtrlSetState($Slider_5, $GUI_ENABLE)
+					GUICtrlSetState($InputBox_5, $GUI_ENABLE)
+					$stateRB[4] = 1
+				Case $Radio5_2
+					GUICtrlSetState($Slider_5, $GUI_ENABLE)
+					GUICtrlSetState($InputBox_5, $GUI_ENABLE)
+					$stateRB[4] = 2
 				Case $Radio5_3
 					GUICtrlSetState($Slider_5, $GUI_DISABLE)
 					GUICtrlSetState($InputBox_5, $GUI_DISABLE)
-				Case $Radio5_1, $Radio5_2, $Radio5_4, $Radio5_5
+					$stateRB[4] = 3
+				Case $Radio5_4
 					GUICtrlSetState($Slider_5, $GUI_ENABLE)
 					GUICtrlSetState($InputBox_5, $GUI_ENABLE)
+					$stateRB[4] = 4
+				Case $Radio5_5
+					GUICtrlSetState($Slider_5, $GUI_ENABLE)
+					GUICtrlSetState($InputBox_5, $GUI_ENABLE)
+					$stateRB[4] = 5
+
 
 
 				Case $StandardCtrl
-					GUICtrlSetState($AdvanceCtrl, $GUI_UNCHECKED)
-					GUICtrlSetState($StandardCtrl, $GUI_CHECKED)
-					GUICtrlSetState($maximisedGR, $GUI_HIDE)
-					GUICtrlSetState($check2, $GUI_HIDE)
-					GUICtrlSetState($Radio2_1, $GUI_HIDE)
-					GUICtrlSetState($Radio2_2, $GUI_HIDE)
-					GUICtrlSetState($Radio2_3, $GUI_HIDE)
-					GUICtrlSetState($Radio2_4, $GUI_HIDE)
-					GUICtrlSetState($Radio2_5, $GUI_HIDE)
-					GUICtrlSetState($InputBox_2, $GUI_HIDE)
-					GUICtrlSetState($Slider_2, $GUI_HIDE)
-					GUICtrlSetState($startGR, $GUI_HIDE)
-					GUICtrlSetState($check3, $GUI_HIDE)
-					GUICtrlSetState($Radio3_1, $GUI_HIDE)
-					GUICtrlSetState($Radio3_2, $GUI_HIDE)
-					GUICtrlSetState($Radio3_3, $GUI_HIDE)
-					GUICtrlSetState($Radio3_4, $GUI_HIDE)
-					GUICtrlSetState($Radio3_5, $GUI_HIDE)
-					GUICtrlSetState($InputBox_3, $GUI_HIDE)
-					GUICtrlSetState($Slider_3, $GUI_HIDE)
-					GUICtrlSetState($cortanaGR, $GUI_HIDE)
-					GUICtrlSetState($check4, $GUI_HIDE)
-					GUICtrlSetState($Radio4_1, $GUI_HIDE)
-					GUICtrlSetState($Radio4_2, $GUI_HIDE)
-					GUICtrlSetState($Radio4_3, $GUI_HIDE)
-					GUICtrlSetState($Radio4_4, $GUI_HIDE)
-					GUICtrlSetState($Radio4_5, $GUI_HIDE)
-					GUICtrlSetState($InputBox_4, $GUI_HIDE)
-					GUICtrlSetState($Slider_4, $GUI_HIDE)
-					GUICtrlSetState($timelineGR, $GUI_HIDE)
-					GUICtrlSetState($check5, $GUI_HIDE)
-					GUICtrlSetState($Radio5_1, $GUI_HIDE)
-					GUICtrlSetState($Radio5_2, $GUI_HIDE)
-					GUICtrlSetState($Radio5_3, $GUI_HIDE)
-					GUICtrlSetState($Radio5_4, $GUI_HIDE)
-					GUICtrlSetState($Radio5_5, $GUI_HIDE)
-					GUICtrlSetState($InputBox_5, $GUI_HIDE)
-					GUICtrlSetState($Slider_5, $GUI_HIDE)
-					GUICtrlSetState($colourset_max, $GUI_HIDE)
-					GUICtrlSetState($colourset_maxtx, $GUI_HIDE)
-					GUICtrlSetState($colourset_sta, $GUI_HIDE)
-					GUICtrlSetState($colourset_statx, $GUI_HIDE)
-					GUICtrlSetState($colourset_cor, $GUI_HIDE)
-					GUICtrlSetState($colourset_cortx, $GUI_HIDE)
-					GUICtrlSetState($colourset_tim, $GUI_HIDE)
-					GUICtrlSetState($colourset_timtx, $GUI_HIDE)
-
+					advancehide()
+					$stateCB[4] = True
 
 				Case $AdvanceCtrl
-					GUICtrlSetState($StandardCtrl, $GUI_UNCHECKED)
-					GUICtrlSetState($AdvanceCtrl, $GUI_CHECKED)
-					GUICtrlSetState($maximisedGR, $GUI_SHOW)
-					GUICtrlSetState($check2, $GUI_SHOW)
-					GUICtrlSetState($Radio2_1, $GUI_SHOW)
-					GUICtrlSetState($Radio2_2, $GUI_SHOW)
-					GUICtrlSetState($Radio2_3, $GUI_SHOW)
-					GUICtrlSetState($Radio2_4, $GUI_SHOW)
-					GUICtrlSetState($Radio2_5, $GUI_SHOW)
-					GUICtrlSetState($InputBox_2, $GUI_SHOW)
-					GUICtrlSetState($Slider_2, $GUI_SHOW)
-					GUICtrlSetState($startGR, $GUI_SHOW)
-					GUICtrlSetState($check3, $GUI_SHOW)
-					GUICtrlSetState($Radio3_1, $GUI_SHOW)
-					GUICtrlSetState($Radio3_2, $GUI_SHOW)
-					GUICtrlSetState($Radio3_3, $GUI_SHOW)
-					GUICtrlSetState($Radio3_4, $GUI_SHOW)
-					GUICtrlSetState($Radio3_5, $GUI_SHOW)
-					GUICtrlSetState($InputBox_3, $GUI_SHOW)
-					GUICtrlSetState($Slider_3, $GUI_SHOW)
-					GUICtrlSetState($cortanaGR, $GUI_SHOW)
-					GUICtrlSetState($check4, $GUI_SHOW)
-					GUICtrlSetState($Radio4_1, $GUI_SHOW)
-					GUICtrlSetState($Radio4_2, $GUI_SHOW)
-					GUICtrlSetState($Radio4_3, $GUI_SHOW)
-					GUICtrlSetState($Radio4_4, $GUI_SHOW)
-					GUICtrlSetState($Radio4_5, $GUI_SHOW)
-					GUICtrlSetState($InputBox_4, $GUI_SHOW)
-					GUICtrlSetState($Slider_4, $GUI_SHOW)
-					GUICtrlSetState($timelineGR, $GUI_SHOW)
-					GUICtrlSetState($check5, $GUI_SHOW)
-					GUICtrlSetState($Radio5_1, $GUI_SHOW)
-					GUICtrlSetState($Radio5_2, $GUI_SHOW)
-					GUICtrlSetState($Radio5_3, $GUI_SHOW)
-					GUICtrlSetState($Radio5_4, $GUI_SHOW)
-					GUICtrlSetState($Radio5_5, $GUI_SHOW)
-					GUICtrlSetState($InputBox_5, $GUI_SHOW)
-					GUICtrlSetState($Slider_5, $GUI_SHOW)
-					GUICtrlSetState($colourset_max, $GUI_SHOW)
-					GUICtrlSetState($colourset_maxtx, $GUI_SHOW)
-					GUICtrlSetState($colourset_sta, $GUI_SHOW)
-					GUICtrlSetState($colourset_statx, $GUI_SHOW)
-					GUICtrlSetState($colourset_cor, $GUI_SHOW)
-					GUICtrlSetState($colourset_cortx, $GUI_SHOW)
-					GUICtrlSetState($colourset_tim, $GUI_SHOW)
-					GUICtrlSetState($colourset_timtx, $GUI_SHOW)
+					advanceshow()
+					$stateCB[4] = False
 
-					;DrawElements()
 
 				Case $btauto
+
 
 					Opt("MouseCoordMode", 0)
 					Send("#r")
@@ -845,48 +1111,34 @@ Func main()
 					;bring settings to focus
 					WinActivate("Settings")
 
+					Opt("SendKeyDelay", 5)
+
 					;reach down
-					Send("{TAB 9}")
+					Send("{TAB 11}")
+					Send("{ENTER}")
+					Sleep(500)
+					Send("{TAB 2}")
+					Send("{ENTER}")
+					Send("{TAB 5}")
+					Send("{RIGHT} +{RIGHT 6}")
+					Send("^{INSERT}") ;language agnostic copy
 
-					;Setting window to DPI Aware
-					DllCall("User32.dll", "bool", "SetProcessDPIAware")
-					;move mouse upto the colour
-					MouseMove(560, 865, 0)
-					Sleep(200)
-
-
-
-
-
-					;taking focus away from settings as windows prevents screenshots of settings
-					WinActivate("Program Manager")
-
-					$sTempFile = _TempFile(@TempDir, "\" & "colour_Sample_", ".jpg", 3)
-
-
-					;getting mouse position and taking a screenshot
-					$pos = MouseGetPos()
-					_ScreenCapture_Capture($sTempFile, $pos[0] - 25, $pos[1] - 25, $pos[0] + 25, $pos[1] + 25)
-					GUICtrlSetImage($preview, $sTempFile)
-
-					;Getting Colour Value from the screenshot's 10*10 position
-					$iPosX = 22
-					$iPosY = 22
-					_GDIPlus_Startup()
-					$hImage = _GDIPlus_ImageLoadFromFile($sTempFile)
-					$colour = Hex(_GDIPlus_BitmapGetPixel($hImage, $iPosX, $iPosY), 6)
-					GUICtrlSetBkColor($colourout, "0x" & $colour)
-					GUICtrlSetData($colourtext, $colour)
-					;ShellExecute($sTempFile)
-					;MsgBox(0, "Pixel Color", $colour)
-					_GDIPlus_ImageDispose($hImage)
-					_GDIPlus_ShutDown()
-
+					$colour = ClipGet()
 					ProcessClose("SystemSettings.exe")
 					ProcessWaitClose("SystemSettings.exe")
 
+					GUICtrlSetImage($preview, "")
+					GUICtrlSetState($arrow, $GUI_HIDE)
+
+					GUICtrlSetBkColor($colourout, "0x" & $colour)
+					GUICtrlSetData($colourtext, $colour)
+
+					Opt("SendKeyDelay", 1)
+
+
 
 				Case $bteye
+
 
 					$sTempFile = _TempFile(@TempDir, "\" & "colour_Sample_", ".jpg", 3)
 
@@ -904,9 +1156,10 @@ Func main()
 					;getting mouse position and taking a screenshot
 					$pos = MouseGetPos()
 					_ScreenCapture_Capture($sTempFile, $pos[0] - 25, $pos[1] - 25, $pos[0] + 25, $pos[1] + 25)
-					Sleep(1000)
+					Sleep(200)
 					GUISetState(@SW_RESTORE)
 					GUICtrlSetImage($preview, $sTempFile)
+					GUICtrlSetState($arrow, $GUI_SHOW)
 
 					;Getting Colour Value from the screenshot's 10*10 position
 					$iPosX = 23
@@ -922,128 +1175,14 @@ Func main()
 					_GDIPlus_ShutDown()
 
 
-				Case $GUI_EVENT_RESIZED, $GUI_EVENT_MAXIMIZE, $GUI_EVENT_RESTORE
-
-					GUICtrlDelete($taskbarGR)
-					;GUICtrlDelete($check1)
-					GUICtrlDelete($Radio1_1)
-					GUICtrlDelete($Radio1_2)
-					GUICtrlDelete($Radio1_3)
-					GUICtrlDelete($Radio1_4)
-					GUICtrlDelete($Radio1_5)
-					GUICtrlDelete($InputBox_1)
-					GUICtrlDelete($Slider_1)
-
-					GUICtrlDelete($maximisedGR)
-					GUICtrlDelete($check2)
-					GUICtrlDelete($Radio2_1)
-					GUICtrlDelete($Radio2_2)
-					GUICtrlDelete($Radio2_3)
-					GUICtrlDelete($Radio2_4)
-					GUICtrlDelete($Radio2_5)
-					GUICtrlDelete($InputBox_2)
-					GUICtrlDelete($Slider_2)
-
-					GUICtrlDelete($startGR)
-					GUICtrlDelete($check3)
-					GUICtrlDelete($Radio3_1)
-					GUICtrlDelete($Radio3_2)
-					GUICtrlDelete($Radio3_3)
-					GUICtrlDelete($Radio3_4)
-					GUICtrlDelete($Radio3_5)
-					GUICtrlDelete($InputBox_3)
-					GUICtrlDelete($Slider_3)
-
-					GUICtrlDelete($cortanaGR)
-					GUICtrlDelete($check4)
-					GUICtrlDelete($Radio4_1)
-					GUICtrlDelete($Radio4_2)
-					GUICtrlDelete($Radio4_3)
-					GUICtrlDelete($Radio4_4)
-					GUICtrlDelete($Radio4_5)
-					GUICtrlDelete($InputBox_4)
-					GUICtrlDelete($Slider_4)
-
-					GUICtrlDelete($timelineGR)
-					GUICtrlDelete($check5)
-					GUICtrlDelete($Radio5_1)
-					GUICtrlDelete($Radio5_2)
-					GUICtrlDelete($Radio5_3)
-					GUICtrlDelete($Radio5_4)
-					GUICtrlDelete($Radio5_5)
-					GUICtrlDelete($InputBox_5)
-					GUICtrlDelete($Slider_5)
-
-
-					GUICtrlDelete($separate)
-					GUICtrlDelete($separate2)
-					GUICtrlDelete($StandardCtrl)
-					GUICtrlDelete($AdvanceCtrl)
-					GUICtrlDelete($paletteGR)
-					GUICtrlDelete($btauto)
-					GUICtrlDelete($bteye)
-					GUICtrlDelete($btpick)
-
-					GUICtrlDelete($preview)
-					GUICtrlDelete($arrow)
-					GUICtrlDelete($colourout)
-					GUICtrlDelete($arrow2)
-					GUICtrlDelete($hexsym)
-					GUICtrlDelete($colourtext)
-
-					GUICtrlDelete($applyGR)
-					GUICtrlDelete($colourset_tas)
-					GUICtrlDelete($colourset_tastx)
-					GUICtrlDelete($colourset_max)
-					GUICtrlDelete($colourset_maxtx)
-					GUICtrlDelete($colourset_sta)
-					GUICtrlDelete($colourset_statx)
-					GUICtrlDelete($colourset_cor)
-					GUICtrlDelete($colourset_cortx)
-					GUICtrlDelete($colourset_tim)
-					GUICtrlDelete($colourset_timtx)
-
-					GUICtrlDelete($peekGR)
-					GUICtrlDelete($peekdynamic)
-					GUICtrlDelete($peekshow)
-					GUICtrlDelete($peekhide)
-					GUICtrlDelete($peekmain)
-					GUICtrlDelete($peekmainyes)
-					GUICtrlDelete($peekmainno)
-
-
-					GUICtrlDelete($extrasGR)
-					GUICtrlDelete($sleeptime)
-					GUICtrlDelete($sleeptime_tx)
-					GUICtrlDelete($systemtray)
-					GUICtrlDelete($trayyes)
-					GUICtrlDelete($trayno)
-					GUICtrlDelete($logging)
-					GUICtrlDelete($loggingyes)
-					GUICtrlDelete($loggingno)
-
-					GUICtrlDelete($finalload)
-					GUICtrlDelete($finalpreview)
-					GUICtrlDelete($finalsave)
-
-
-
-
-					DrawElements()
-
-
-
-
-
-
-
 
 				Case $btpick
+
+
+					GUICtrlSetState($arrow, $GUI_HIDE)
+					GUICtrlSetImage($preview, "")
 					; Load cursor
-					$hInstance = _WinAPI_LoadLibrary(@SystemDir & '\mspaint.exe')
-					$hCursor = DllCall('user32.dll', 'ptr', 'LoadCursor', 'ptr', $hInstance, 'dword', 1204)
-					$hCursor = $hCursor[0]
-					_WinAPI_FreeLibrary($hInstance)
+			   #cs
 					Dim $aPalette[20] = _
 							[0xFFFFFF, 0x000000, 0xC0C0C0, 0x808080, _
 							0xFF0000, 0x800000, 0xFFFF00, 0x808000, _
@@ -1051,12 +1190,35 @@ Func main()
 							0x0000FF, 0x000080, 0xFF00FF, 0x800080, _
 							0xC0DCC0, 0xA6CAF0, 0xFFFBF0, 0xA0A0A4]
 
+			   #ce
 					$colour = Hex(_GUIColorPicker_GetColor($btpick), 6)
 					GUICtrlSetBkColor($colourout, "0x" & $colour)
 					GUICtrlSetData($colourtext, $colour)
 
+				Case $peekdynamic
+					$stateextra[0] = 1
+				Case $peekshow
+					$stateextra[0] = 2
+				Case $peekhide
+					$stateextra[0] = 3
 
+				Case $trayyes
+					$stateextra[3] = 1
+				Case $trayno
+					$stateextra[3] = 2
 
+				Case $GUI_EVENT_RESIZED
+				   Sleep(50)
+					uirefresh()
+				 Case $GUI_EVENT_MAXIMIZE
+					uirefresh()
+					$max = True
+				 Case $GUI_EVENT_RESTORE
+					Sleep(50)
+					If $max Then
+						uirefresh()
+						$max = False ;unnessary refresh on window restored after being minimised fix
+					EndIf
 
 
 
@@ -1079,6 +1241,7 @@ Func main()
 				$check_Slide3[1] = False
 				$check_Slide4[1] = False
 				$check_Slide5[1] = False
+
 			ElseIf $Info[4] = $InputBox_1 And $Info[2] Then
 				$check_Slide1[1] = True
 				$check_Slide1[0] = False
@@ -1086,6 +1249,7 @@ Func main()
 				$check_Slide3[1] = False
 				$check_Slide4[1] = False
 				$check_Slide5[1] = False
+
 			ElseIf $Info[4] = $Slider_2 And $Info[2] Then
 				$check_Slide2[1] = True
 				$check_Slide1[1] = False
@@ -1093,6 +1257,7 @@ Func main()
 				$check_Slide3[1] = False
 				$check_Slide4[1] = False
 				$check_Slide5[1] = False
+
 			ElseIf $Info[4] = $InputBox_2 And $Info[2] Then
 				$check_Slide2[1] = True
 				$check_Slide1[1] = False
@@ -1100,6 +1265,7 @@ Func main()
 				$check_Slide3[1] = False
 				$check_Slide4[1] = False
 				$check_Slide5[1] = False
+
 			ElseIf $Info[4] = $Slider_3 And $Info[2] Then
 				$check_Slide3[1] = True
 				$check_Slide1[1] = False
@@ -1107,6 +1273,7 @@ Func main()
 				$check_Slide3[0] = True
 				$check_Slide4[1] = False
 				$check_Slide5[1] = False
+
 			ElseIf $Info[4] = $InputBox_3 And $Info[2] Then
 				$check_Slide3[1] = True
 				$check_Slide1[1] = False
@@ -1114,6 +1281,7 @@ Func main()
 				$check_Slide3[0] = False
 				$check_Slide4[1] = False
 				$check_Slide5[1] = False
+
 			ElseIf $Info[4] = $Slider_4 And $Info[2] Then
 				$check_Slide4[1] = True
 				$check_Slide1[1] = False
@@ -1121,6 +1289,7 @@ Func main()
 				$check_Slide3[1] = False
 				$check_Slide4[0] = True
 				$check_Slide5[1] = False
+
 			ElseIf $Info[4] = $InputBox_4 And $Info[2] Then
 				$check_Slide4[1] = True
 				$check_Slide1[1] = False
@@ -1128,6 +1297,7 @@ Func main()
 				$check_Slide3[1] = False
 				$check_Slide4[0] = False
 				$check_Slide5[1] = False
+
 			ElseIf $Info[4] = $Slider_5 And $Info[2] Then
 				$check_Slide5[1] = True
 				$check_Slide1[1] = False
@@ -1135,6 +1305,7 @@ Func main()
 				$check_Slide3[1] = False
 				$check_Slide4[1] = False
 				$check_Slide5[0] = True
+
 			ElseIf $Info[4] = $InputBox_5 And $Info[2] Then
 				$check_Slide5[1] = True
 				$check_Slide1[1] = False
@@ -1142,50 +1313,98 @@ Func main()
 				$check_Slide3[1] = False
 				$check_Slide4[1] = False
 				$check_Slide5[0] = False
+
 			EndIf
 
 
 
 			If $check_Slide1[1] = True Then
 				If $check_Slide1[0] Then
-					GUICtrlSetData($InputBox_1, GUICtrlRead($Slider_1))
+					Local $val = GUICtrlRead($Slider_1)
+					GUICtrlSetData($InputBox_1, $val)
+					$stateBLUR[0] = $val
 
 				ElseIf Not $check_Slide1[0] Then
-					GUICtrlSetData($Slider_1, GUICtrlRead($InputBox_1))
+					Local $val = GUICtrlRead($InputBox_1)
+					GUICtrlSetData($Slider_1, $val)
+					$stateBLUR[0] = $val
 				EndIf
 
 			ElseIf $check_Slide2[1] = True Then
 				If $check_Slide2[0] Then
-					GUICtrlSetData($InputBox_2, GUICtrlRead($Slider_2))
+					Local $val = GUICtrlRead($Slider_2)
+					GUICtrlSetData($InputBox_2, $val)
+					$stateBLUR[1] = $val
 
 				ElseIf Not $check_Slide2[0] Then
-					GUICtrlSetData($Slider_2, GUICtrlRead($InputBox_2))
+					Local $val = GUICtrlRead($InputBox_2)
+					GUICtrlSetData($Slider_2, $val)
+					$stateBLUR[1] = $val
 				EndIf
 
 			ElseIf $check_Slide3[1] = True Then
 				If $check_Slide3[0] Then
-					GUICtrlSetData($InputBox_3, GUICtrlRead($Slider_3))
+					Local $val = GUICtrlRead($Slider_3)
+					GUICtrlSetData($InputBox_3, $val)
+					$stateBLUR[2] = $val
 
 				ElseIf Not $check_Slide3[0] Then
-					GUICtrlSetData($Slider_3, GUICtrlRead($InputBox_3))
+					Local $val = GUICtrlRead($InputBox_3)
+					GUICtrlSetData($Slider_3, $val)
+					$stateBLUR[2] = $val
 				EndIf
 
 			ElseIf $check_Slide4[1] = True Then
 				If $check_Slide4[0] Then
-					GUICtrlSetData($InputBox_4, GUICtrlRead($Slider_4))
+					Local $val = GUICtrlRead($Slider_4)
+					GUICtrlSetData($InputBox_4, $val)
+					$stateBLUR[3] = $val
 
 				ElseIf Not $check_Slide4[0] Then
-					GUICtrlSetData($Slider_4, GUICtrlRead($InputBox_4))
+					Local $val = GUICtrlRead($InputBox_4)
+					GUICtrlSetData($Slider_4, $val)
+					$stateBLUR[3] = $val
 				EndIf
 
 			ElseIf $check_Slide5[1] = True Then
 				If $check_Slide5[0] Then
-					GUICtrlSetData($InputBox_5, GUICtrlRead($Slider_5))
+					Local $val = GUICtrlRead($Slider_5)
+					GUICtrlSetData($InputBox_5, $val)
+					$stateBLUR[4] = $val
 
 				ElseIf Not $check_Slide5[0] Then
-					GUICtrlSetData($Slider_5, GUICtrlRead($InputBox_5))
+					Local $val = GUICtrlRead($InputBox_5)
+					GUICtrlSetData($Slider_5, $val)
+					$stateBLUR[4] = $val
 				EndIf
+
+			ElseIf StringCompare($colour, GUICtrlRead($colourtext), 2) <> 0 Then
+				GUICtrlSetBkColor($colourout, "0x" & GUICtrlRead($colourtext))
+				$colour = GUICtrlRead($colourtext)
+				_GUIColorPicker_SetColor($btpick, Dec(GUICtrlRead($colourtext)))
+
+			ElseIf StringCompare($colourset[0], GUICtrlRead($colourset_tastx), 2) <> 0 Then
+				$colourset[0] = GUICtrlRead($colourset_tastx)
+
+			ElseIf StringCompare($colourset[1], GUICtrlRead($colourset_maxtx), 2) <> 0 Then
+				$colourset[1] = GUICtrlRead($colourset_maxtx)
+
+			ElseIf StringCompare($colourset[2], GUICtrlRead($colourset_statx), 2) <> 0 Then
+				$colourset[2] = GUICtrlRead($colourset_statx)
+
+			ElseIf StringCompare($colourset[3], GUICtrlRead($colourset_cortx), 2) <> 0 Then
+				$colourset[3] = GUICtrlRead($colourset_cortx)
+
+			ElseIf StringCompare($colourset[4], GUICtrlRead($colourset_timtx), 2) <> 0 Then
+				$colourset[4] = GUICtrlRead($colourset_timtx)
+
+			ElseIf StringCompare($stateextra[2], GUICtrlRead($sleeptime_tx), 2) <> 0 Then
+				$stateextra[2] = GUICtrlRead($sleeptime_tx)
 			EndIf
+
+
+
+
 
 
 		EndIf ;minimise/outer click error mitigation endif
@@ -1200,5 +1419,245 @@ Func main()
 
 
 EndFunc   ;==>main
+
+
+
+
+Func uirefresh()
+
+
+	GUICtrlDelete($taskbarGR)
+	;GUICtrlDelete($check1)
+	GUICtrlDelete($Radio1_1)
+	GUICtrlDelete($Radio1_2)
+	GUICtrlDelete($Radio1_3)
+	GUICtrlDelete($Radio1_4)
+	GUICtrlDelete($Radio1_5)
+	GUICtrlDelete($InputBox_1)
+	GUICtrlDelete($Slider_1)
+
+	GUICtrlDelete($maximisedGR)
+	GUICtrlDelete($check2)
+	GUICtrlDelete($Radio2_1)
+	GUICtrlDelete($Radio2_2)
+	GUICtrlDelete($Radio2_3)
+	GUICtrlDelete($Radio2_4)
+	GUICtrlDelete($Radio2_5)
+	GUICtrlDelete($InputBox_2)
+	GUICtrlDelete($Slider_2)
+
+	GUICtrlDelete($startGR)
+	GUICtrlDelete($check3)
+	GUICtrlDelete($Radio3_1)
+	GUICtrlDelete($Radio3_2)
+	GUICtrlDelete($Radio3_3)
+	GUICtrlDelete($Radio3_4)
+	GUICtrlDelete($Radio3_5)
+	GUICtrlDelete($InputBox_3)
+	GUICtrlDelete($Slider_3)
+
+	GUICtrlDelete($cortanaGR)
+	GUICtrlDelete($check4)
+	GUICtrlDelete($Radio4_1)
+	GUICtrlDelete($Radio4_2)
+	GUICtrlDelete($Radio4_3)
+	GUICtrlDelete($Radio4_4)
+	GUICtrlDelete($Radio4_5)
+	GUICtrlDelete($InputBox_4)
+	GUICtrlDelete($Slider_4)
+
+	GUICtrlDelete($timelineGR)
+	GUICtrlDelete($check5)
+	GUICtrlDelete($Radio5_1)
+	GUICtrlDelete($Radio5_2)
+	GUICtrlDelete($Radio5_3)
+	GUICtrlDelete($Radio5_4)
+	GUICtrlDelete($Radio5_5)
+	GUICtrlDelete($InputBox_5)
+	GUICtrlDelete($Slider_5)
+
+
+	GUICtrlDelete($separate)
+	GUICtrlDelete($separate2)
+	GUICtrlDelete($StandardCtrl)
+	GUICtrlDelete($AdvanceCtrl)
+	GUICtrlDelete($paletteGR)
+	GUICtrlDelete($btauto)
+	GUICtrlDelete($bteye)
+	 _GUIColorPicker_Delete($btpick)  ;this screwed with me a lot, and for a LONG while
+	 GUICtrlDelete($btpick)
+
+	GUICtrlDelete($preview)
+	GUICtrlDelete($arrow)
+	GUICtrlDelete($colourout)
+	GUICtrlDelete($arrow2)
+	GUICtrlDelete($hexsym)
+	GUICtrlDelete($colourtext)
+
+	GUICtrlDelete($applyGR)
+	GUICtrlDelete($colourset_tas)
+	GUICtrlDelete($colourset_tastx)
+	GUICtrlDelete($colourset_max)
+	GUICtrlDelete($colourset_maxtx)
+	GUICtrlDelete($colourset_sta)
+	GUICtrlDelete($colourset_statx)
+	GUICtrlDelete($colourset_cor)
+	GUICtrlDelete($colourset_cortx)
+	GUICtrlDelete($colourset_tim)
+	GUICtrlDelete($colourset_timtx)
+
+	GUICtrlDelete($peekGR)
+	GUICtrlDelete($peekdynamic)
+	GUICtrlDelete($peekshow)
+	GUICtrlDelete($peekhide)
+	GUICtrlDelete($peekmain)
+	GUICtrlDelete($peekmainyes)
+	GUICtrlDelete($peekmainno)
+
+
+	GUICtrlDelete($extrasGR)
+	GUICtrlDelete($sleeptime)
+	GUICtrlDelete($sleeptime_tx)
+	GUICtrlDelete($systemtray)
+	GUICtrlDelete($trayyes)
+	GUICtrlDelete($trayno)
+	GUICtrlDelete($logging)
+	GUICtrlDelete($loggingyes)
+	GUICtrlDelete($loggingno)
+
+	GUICtrlDelete($finalload)
+	GUICtrlDelete($finalpreview)
+	GUICtrlDelete($finalsave)
+	DrawElements()
+	Return
+EndFunc   ;==>uirefresh
+
+Func advancehide()
+
+	GUICtrlSetState($AdvanceCtrl, $GUI_UNCHECKED)
+	GUICtrlSetState($StandardCtrl, $GUI_CHECKED)
+	GUICtrlSetState($maximisedGR, $GUI_HIDE)
+	GUICtrlSetState($check2, $GUI_HIDE)
+	GUICtrlSetState($Radio2_1, $GUI_HIDE)
+	GUICtrlSetState($Radio2_2, $GUI_HIDE)
+	GUICtrlSetState($Radio2_3, $GUI_HIDE)
+	GUICtrlSetState($Radio2_4, $GUI_HIDE)
+	GUICtrlSetState($Radio2_5, $GUI_HIDE)
+	GUICtrlSetState($InputBox_2, $GUI_HIDE)
+	GUICtrlSetState($Slider_2, $GUI_HIDE)
+	GUICtrlSetState($startGR, $GUI_HIDE)
+	GUICtrlSetState($check3, $GUI_HIDE)
+	GUICtrlSetState($Radio3_1, $GUI_HIDE)
+	GUICtrlSetState($Radio3_2, $GUI_HIDE)
+	GUICtrlSetState($Radio3_3, $GUI_HIDE)
+	GUICtrlSetState($Radio3_4, $GUI_HIDE)
+	GUICtrlSetState($Radio3_5, $GUI_HIDE)
+	GUICtrlSetState($InputBox_3, $GUI_HIDE)
+	GUICtrlSetState($Slider_3, $GUI_HIDE)
+	GUICtrlSetState($cortanaGR, $GUI_HIDE)
+	GUICtrlSetState($check4, $GUI_HIDE)
+	GUICtrlSetState($Radio4_1, $GUI_HIDE)
+	GUICtrlSetState($Radio4_2, $GUI_HIDE)
+	GUICtrlSetState($Radio4_3, $GUI_HIDE)
+	GUICtrlSetState($Radio4_4, $GUI_HIDE)
+	GUICtrlSetState($Radio4_5, $GUI_HIDE)
+	GUICtrlSetState($InputBox_4, $GUI_HIDE)
+	GUICtrlSetState($Slider_4, $GUI_HIDE)
+	GUICtrlSetState($timelineGR, $GUI_HIDE)
+	GUICtrlSetState($check5, $GUI_HIDE)
+	GUICtrlSetState($Radio5_1, $GUI_HIDE)
+	GUICtrlSetState($Radio5_2, $GUI_HIDE)
+	GUICtrlSetState($Radio5_3, $GUI_HIDE)
+	GUICtrlSetState($Radio5_4, $GUI_HIDE)
+	GUICtrlSetState($Radio5_5, $GUI_HIDE)
+	GUICtrlSetState($InputBox_5, $GUI_HIDE)
+	GUICtrlSetState($Slider_5, $GUI_HIDE)
+	GUICtrlSetState($colourset_max, $GUI_HIDE)
+	GUICtrlSetState($colourset_maxtx, $GUI_HIDE)
+	GUICtrlSetState($colourset_sta, $GUI_HIDE)
+	GUICtrlSetState($colourset_statx, $GUI_HIDE)
+	GUICtrlSetState($colourset_cor, $GUI_HIDE)
+	GUICtrlSetState($colourset_cortx, $GUI_HIDE)
+	GUICtrlSetState($colourset_tim, $GUI_HIDE)
+	GUICtrlSetState($colourset_timtx, $GUI_HIDE)
+	GUICtrlSetState($peekmain, $GUI_HIDE)
+	GUICtrlSetState($peekmainyes, $GUI_HIDE)
+	GUICtrlSetState($peekmainno, $GUI_HIDE)
+	GUICtrlSetState($extrasGR, $GUI_HIDE)
+	GUICtrlSetState($sleeptime, $GUI_HIDE)
+	GUICtrlSetState($sleeptime_tx, $GUI_HIDE)
+	GUICtrlSetState($systemtray, $GUI_HIDE)
+	GUICtrlSetState($trayyes, $GUI_HIDE)
+	GUICtrlSetState($trayno, $GUI_HIDE)
+	GUICtrlSetState($logging, $GUI_HIDE)
+	GUICtrlSetState($loggingyes, $GUI_HIDE)
+	GUICtrlSetState($loggingno, $GUI_HIDE)
+	Return
+EndFunc   ;==>advancehide
+
+
+
+Func advanceshow()
+	GUICtrlSetState($StandardCtrl, $GUI_UNCHECKED)
+	GUICtrlSetState($AdvanceCtrl, $GUI_CHECKED)
+	GUICtrlSetState($maximisedGR, $GUI_SHOW)
+	GUICtrlSetState($check2, $GUI_SHOW)
+	GUICtrlSetState($Radio2_1, $GUI_SHOW)
+	GUICtrlSetState($Radio2_2, $GUI_SHOW)
+	GUICtrlSetState($Radio2_3, $GUI_SHOW)
+	GUICtrlSetState($Radio2_4, $GUI_SHOW)
+	GUICtrlSetState($Radio2_5, $GUI_SHOW)
+	GUICtrlSetState($InputBox_2, $GUI_SHOW)
+	GUICtrlSetState($Slider_2, $GUI_SHOW)
+	GUICtrlSetState($startGR, $GUI_SHOW)
+	GUICtrlSetState($check3, $GUI_SHOW)
+	GUICtrlSetState($Radio3_1, $GUI_SHOW)
+	GUICtrlSetState($Radio3_2, $GUI_SHOW)
+	GUICtrlSetState($Radio3_3, $GUI_SHOW)
+	GUICtrlSetState($Radio3_4, $GUI_SHOW)
+	GUICtrlSetState($Radio3_5, $GUI_SHOW)
+	GUICtrlSetState($InputBox_3, $GUI_SHOW)
+	GUICtrlSetState($Slider_3, $GUI_SHOW)
+	GUICtrlSetState($cortanaGR, $GUI_SHOW)
+	GUICtrlSetState($check4, $GUI_SHOW)
+	GUICtrlSetState($Radio4_1, $GUI_SHOW)
+	GUICtrlSetState($Radio4_2, $GUI_SHOW)
+	GUICtrlSetState($Radio4_3, $GUI_SHOW)
+	GUICtrlSetState($Radio4_4, $GUI_SHOW)
+	GUICtrlSetState($Radio4_5, $GUI_SHOW)
+	GUICtrlSetState($InputBox_4, $GUI_SHOW)
+	GUICtrlSetState($Slider_4, $GUI_SHOW)
+	GUICtrlSetState($timelineGR, $GUI_SHOW)
+	GUICtrlSetState($check5, $GUI_SHOW)
+	GUICtrlSetState($Radio5_1, $GUI_SHOW)
+	GUICtrlSetState($Radio5_2, $GUI_SHOW)
+	GUICtrlSetState($Radio5_3, $GUI_SHOW)
+	GUICtrlSetState($Radio5_4, $GUI_SHOW)
+	GUICtrlSetState($Radio5_5, $GUI_SHOW)
+	GUICtrlSetState($InputBox_5, $GUI_SHOW)
+	GUICtrlSetState($Slider_5, $GUI_SHOW)
+	GUICtrlSetState($colourset_max, $GUI_SHOW)
+	GUICtrlSetState($colourset_maxtx, $GUI_SHOW)
+	GUICtrlSetState($colourset_sta, $GUI_SHOW)
+	GUICtrlSetState($colourset_statx, $GUI_SHOW)
+	GUICtrlSetState($colourset_cor, $GUI_SHOW)
+	GUICtrlSetState($colourset_cortx, $GUI_SHOW)
+	GUICtrlSetState($colourset_tim, $GUI_SHOW)
+	GUICtrlSetState($colourset_timtx, $GUI_SHOW)
+	GUICtrlSetState($peekmain, $GUI_SHOW)
+	GUICtrlSetState($peekmainyes, $GUI_SHOW)
+	GUICtrlSetState($peekmainno, $GUI_SHOW)
+	GUICtrlSetState($extrasGR, $GUI_SHOW)
+	GUICtrlSetState($sleeptime, $GUI_SHOW)
+	GUICtrlSetState($sleeptime_tx, $GUI_SHOW)
+	GUICtrlSetState($systemtray, $GUI_SHOW)
+	GUICtrlSetState($trayyes, $GUI_SHOW)
+	GUICtrlSetState($trayno, $GUI_SHOW)
+	GUICtrlSetState($logging, $GUI_SHOW)
+	GUICtrlSetState($loggingyes, $GUI_SHOW)
+	GUICtrlSetState($loggingno, $GUI_SHOW)
+	Return
+EndFunc   ;==>advanceshow
+
 
 

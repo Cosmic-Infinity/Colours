@@ -1,3 +1,5 @@
+#AutoIt3Wrapper_Icon=.\assets\Colours-Icon-new-85.ico
+
 Global $colour = ""
 PickColour()
 ApplyColour($colour)
