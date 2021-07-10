@@ -1,4 +1,5 @@
-#AutoIt3Wrapper_Icon=.\assets\Colours-Icon-new-85.ico
+#AutoIt3Wrapper_Icon= @ScriptDir & "\assets\ColoursIconNew85.ico" ;optional
+#include <File.au3>
 
 Global $colour = ""
 PickColour()
@@ -6,41 +7,12 @@ ApplyColour($colour)
 
 
 Func PickColour()
-	Send("#r")
-	Sleep(500)
-	Send("ms-settings:colors{ENTER}")
-	Opt("SendKeyDelay",1)
 
+	$colour = Hex(RegRead("HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Themes\History\Colors", "ColorHistory0"))
+	$colour = StringRight($colour, 6)
+	$colour = StringRight($colour, 2) & StringMid($colour, 3, 2) & StringLeft($colour, 2)
 
-	;wait for settings to start by checking visible text on the window is 'Settings'
-	While 1
-		Local $text = WinGetText("[ACTIVE]")
-		if Not StringInStr($text, "Settings") = 0 Then
-			ExitLoop
-		Else
-			Sleep(50)
-		EndIf
-
-		WinActivate("Settings")
-	WEnd
-
-Opt("SendKeyDelay",5)
-	;bring settings to focus
-	WinActivate("Settings")
-	Send("{TAB 11}")
-	Send("{ENTER}")
-	Sleep(500)
-	Send("{TAB 2}")
-	Send("{ENTER}")
-	Send("{TAB 5}")
-	Send("{RIGHT} +{RIGHT 6}")
-	Send("^{INSERT}") ;language agnostic copy
-
-    Opt("SendKeyDelay",1)
-
-	$colour = ClipGet()
-	ProcessClose("SystemSettings.exe")
-	ProcessWaitClose("SystemSettings.exe")
+	;MsgBox(0, "COLOUR", $colour)
 
 EndFunc   ;==>PickColour
 
@@ -48,58 +20,39 @@ EndFunc   ;==>PickColour
 
 Func ApplyColour($applying)
 
-	;start notepad
-	Run("Notepad.exe")
-	ProcessWait("notepad.exe")
-	WinActivate("Notepad")
-	;send CTRL+O for open
-	Send("^o")
-	;wait for open window
-	WinWaitActive("Open")
+	Local $aLines
+	_FileReadToArray(@AppDataDir & "\TranslucentTB\config.cfg", $aLines, $FRTA_COUNT)
+	Local $count = 0
+	Local $replace
 
-	;changing key press delay momentarily
-	opt("SendKeyDelay", 3)
-	Send("%UserProfile%\AppData\Roaming\TranslucentTB\config.cfg{ENTER}")
-	opt("SendKeyDelay", 5)
 
-	;move cursor to location
-	Send("{DOWN}{RIGHT 6}")
+	For $i = 1 To $aLines[0]
+		For $j = 0 to(StringLen($aLines[$i]) - 1)
+			If(StringMid($aLines[$i], $j, 1) == Chr(61)) Then
+				$count += 1
+			EndIf
+			If $count == 2 Then
+				$replace = StringMid($aLines[$i], $j + 1, 6)
+				ExitLoop
+			EndIf
 
-	;select old colour
-	Send("+{RIGHT 6}")
+		Next
 
-	;open replace window , fill 'replace with' box
-	Send("^h{TAB}" & $applying)
+		If $count == 2 Then
+			ExitLoop
+		EndIf
+	Next
 
-	;reach 'replace all' button
-	Send("{TAB 5}")
 
-	;press enter
-	Send("{ENTER}")
-
-	Sleep(250)
-
-	;close replace window
-	Send("!{F4}")
-
+	_ReplaceStringInFile(@AppDataDir & "\TranslucentTB\config.cfg", $replace, $applying, 0, 1)
 
 	;close TranslucentTB
 	ProcessClose("TranslucentTB.exe")
 	ProcessWaitClose("TranslucentTB.exe")
 
-	;save the file changes
-	Send("^s")
-	Sleep(500)
-
-	;close Notepad and wait for it to close
-	Send("!{F4}")
-	ProcessWaitClose("notepad.exe")
 
 	;start translucentTB again
-	Send("#r")
-	Sleep(500)
-	Send("%ProgramFiles(x86)%\TranslucentTB\TranslucentTB.exe")
-	send("{ENTER}")
+	Run(StringLeft(@WindowsDir, 3) & "Program Files (x86)\TranslucentTB\TranslucentTB.exe")
 	ProcessWait("TranslucentTB.exe")
 
 EndFunc   ;==>ApplyColour
