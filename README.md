@@ -18,7 +18,6 @@ To use it, you'll need :
 
 1. **TranslucentTB** by _Charles Milette_ (https://github.com/TranslucentTB/TranslucentTB/releases/latest)
 
-The Taskbar Blur Levels and Blur Style can be changed from TranslucentTB itself.
 
 
 <br/>
