@@ -14,16 +14,17 @@
 ;#include <WindowsConstants.au3>
 ;#include <ButtonConstants.au3>
 ;#include <FontConstants.au3>
-#include <StaticConstants.au3> ; for graphic(lines)
+#include <StaticConstants.au3> ; For graphic(lines)
 ;#include <GuiToolTip.au3>
 #include <ScreenCapture.au3> ; Screenshot Library
 #include <GDIPlus.au3> ; ImageProcessing Library
 #include <File.au3> ; temporary file name generation library
-#include <Misc.au3> ; mouse click detection and font styles
-#Include <ColorPicker.au3> ; colour picker udf
+#include <Misc.au3> ; mouse click detection And font styles
+#include <ColorPicker.au3> ; colour picker udf
 ;#Include <WinAPI.au3>
 #include <GuiEdit.au3>
 ;#include <StringConstants.au3> ;for string constants
+#include <File.au3>
 
 
 
@@ -38,8 +39,13 @@
 
 
 
+Global $sfilepath = "C:\Users\Shubham\Desktop\colourstarget.txt"
+
+;_ReplaceStringInFile ( $sFilePath, "color", "colours", 0 , 0 )
+
 ;Control temporary state /  reading file state on launch
 Global $max
+Global $previewactive = False
 
 
 Global $stateCB[5]                     ;stores checkbox selected. 0-3 are checkbox. 4 is advance & standard box
@@ -82,7 +88,7 @@ Global $sTempFile                      ;trmporary file to save image file use fo
 Global $colour = "FFFFFF"             ;detected/extracted/selected colour
 
 
-Global $iScale = RegRead("HKCU\Control Panel\Desktop\WindowMetrics", "AppliedDPI") / 96
+;Global $iScale = RegRead("HKCU\Control Panel\Desktop\WindowMetrics", "AppliedDPI") / 96
 ;$iScale=$iScale/1.5 ;scale correction relative to my display's scaling
 
 
@@ -91,6 +97,7 @@ Global $iScale = RegRead("HKCU\Control Panel\Desktop\WindowMetrics", "AppliedDPI
 
 DrawWin()
 DrawElements()
+fload()
 main()
 
 
@@ -100,8 +107,8 @@ Func DrawWin()
 
 	Global $gui = GUICreate("Colours GUI", @DesktopWidth / 1.28, @DesktopHeight / 1.2855, -1, -1, BitOR($WS_SYSMENU, $WS_MINIMIZEBOX, $WS_SIZEBOX, $WS_MAXIMIZEBOX))
 	;1500, 840
-	GUISetIcon("C:\Users\Shubham\Documents\GitHub\Colours\assets\Colours-Icon-new-16.ico")
-	TraySetIcon("C:\Users\Shubham\Documents\GitHub\Colours\assets\Colours-Icon-new-32.ico")
+	GUISetIcon("C:\Users\Shubham\Documents\GitHub\Colours\assets\ColoursIconNew16.ico")
+	TraySetIcon("C:\Users\Shubham\Documents\GitHub\Colours\assets\ColoursIconNew32.ico")
 	GUISetBkColor(0x00FFFFFF) ; will change background color
 
 	;sw enable
@@ -170,7 +177,7 @@ Func DrawElements()
 	;$stateRB[0] = 1
 
 
-	if $stateRB[0] = 1 Then
+	If $stateRB[0] = 1 Then
 		GUICtrlSetState($Radio1_1, $GUI_CHECKED)
 	ElseIf $stateRB[0] = 2 Then
 		GUICtrlSetState($Radio1_2, $GUI_CHECKED)
@@ -183,7 +190,7 @@ Func DrawElements()
 	ElseIf $stateRB[0] = 5 Then
 		GUICtrlSetState($Radio1_5, $GUI_CHECKED)
 	Else
-		MsgBox($MB_ICONWARNING, "Error Reading Value", "Taskbar accent can't be read!" & @CRLF & "Please edit the Config file yourself.")
+		MsgBox($MB_ICONWARNING, "Error Reading Value", "Taskbar accent can't be read!" & @CRLF & "Please restore the config file to its initial state")
 	EndIf
 
 
@@ -238,7 +245,7 @@ Func DrawElements()
 
 	;$stateRB[1] = 2
 
-	if $stateRB[1] = 1 Then
+	If $stateRB[1] = 1 Then
 		GUICtrlSetState($Radio2_1, $GUI_CHECKED)
 	ElseIf $stateRB[1] = 2 Then
 		GUICtrlSetState($Radio2_2, $GUI_CHECKED)
@@ -251,7 +258,7 @@ Func DrawElements()
 	ElseIf $stateRB[1] = 5 Then
 		GUICtrlSetState($Radio2_5, $GUI_CHECKED)
 	Else
-		MsgBox($MB_ICONWARNING, "Error Reading Value", "Window Maximised accent can't be read!" & @CRLF & "Please edit the Config file yourself.")
+		MsgBox($MB_ICONWARNING, "Error Reading Value", "Window Maximised accent can't be read!" & @CRLF & "Please restore the config file to its initial state")
 	EndIf
 
 
@@ -314,7 +321,7 @@ Func DrawElements()
 
 	;$stateRB[2] = 3
 
-	if $stateRB[2] = 1 Then
+	If $stateRB[2] = 1 Then
 		GUICtrlSetState($Radio3_1, $GUI_CHECKED)
 	ElseIf $stateRB[2] = 2 Then
 		GUICtrlSetState($Radio3_2, $GUI_CHECKED)
@@ -327,7 +334,7 @@ Func DrawElements()
 	ElseIf $stateRB[2] = 5 Then
 		GUICtrlSetState($Radio3_5, $GUI_CHECKED)
 	Else
-		MsgBox($MB_ICONWARNING, "Error Reading Value", "Start accent can't be read!" & @CRLF & "Please edit the Config file yourself.")
+		MsgBox($MB_ICONWARNING, "Error Reading Value", "Start accent can't be read!" & @CRLF & "Please restore the config file to its initial state")
 	EndIf
 
 
@@ -390,7 +397,7 @@ Func DrawElements()
 
 	;$stateRB[3] = 4
 
-	if $stateRB[3] = 1 Then
+	If $stateRB[3] = 1 Then
 		GUICtrlSetState($Radio4_1, $GUI_CHECKED)
 	ElseIf $stateRB[3] = 2 Then
 		GUICtrlSetState($Radio4_2, $GUI_CHECKED)
@@ -403,7 +410,7 @@ Func DrawElements()
 	ElseIf $stateRB[2] = 5 Then
 		GUICtrlSetState($Radio4_5, $GUI_CHECKED)
 	Else
-		MsgBox($MB_ICONWARNING, "Error Reading Value", "Cortana menu accent can't be read!" & @CRLF & "Please edit the Config file yourself.")
+		MsgBox($MB_ICONWARNING, "Error Reading Value", "Cortana menu accent can't be read!" & @CRLF & "Please restore the config file to its initial state")
 	EndIf
 
 
@@ -465,7 +472,7 @@ Func DrawElements()
 
 	;$stateRB[4] = 5
 
-	if $stateRB[4] = 1 Then
+	If $stateRB[4] = 1 Then
 		GUICtrlSetState($Radio5_1, $GUI_CHECKED)
 	ElseIf $stateRB[4] = 2 Then
 		GUICtrlSetState($Radio5_2, $GUI_CHECKED)
@@ -478,7 +485,7 @@ Func DrawElements()
 	ElseIf $stateRB[4] = 5 Then
 		GUICtrlSetState($Radio5_5, $GUI_CHECKED)
 	Else
-		MsgBox($MB_ICONWARNING, "Error Reading Value", "Timeline accent can't be read!" & @CRLF & "Please edit the Config file yourself.")
+		MsgBox($MB_ICONWARNING, "Error Reading Value", "Timeline accent can't be read!" & @CRLF & "Please restore the config file to its initial state")
 	EndIf
 
 
@@ -538,7 +545,7 @@ Func DrawElements()
 	GUICtrlSetFont(-1, $leftLB / 5, $FW_EXTRALIGHT, 0, "Candara", 2)
 	GUICtrlSetTip(-1, "Turns the mouse into an Eyedropper" & @CRLF & "allowing selection of any colour from UI." & @CRLF & "NOTE : Temporarily hides this Window till colour selection.", "Eyedropper", 1, BitOR(1, 2)) ;@CRLF & "Samples 2 pixels diagonally above the mouse pointer."
 
-; Create Picker1 with custom cursor
+	; Create Picker1 with custom cursor
 	Global $btpick = _GUIColorPicker_Create("Colour Picker", $size[2] / 1.21, $topLB * 7, $leftLB * 3, $topLB * 1.3, "0x" & $colour, BitOR($CP_FLAG_CHOOSERBUTTON, $CP_FLAG_ARROWSTYLE, $CP_FLAG_MOUSEWHEEL), '', 0, -1, -1, 'Pick a Colour', 'More')
 
 	GUICtrlSetFont(-1, $leftLB / 5, $FW_EXTRALIGHT, 0, "Candara", 2)
@@ -675,7 +682,7 @@ Func DrawElements()
 	ElseIf $stateextra[0] = 3 Then
 		GUICtrlSetState($peekhide, $GUI_CHECKED)
 	Else
-		MsgBox($MB_ICONWARNING, "Error Reading Value", "Peek Behaviour Control state can't be read!" & @CRLF & "Please edit the Config file yourself.")
+		MsgBox($MB_ICONWARNING, "Error Reading Value", "Peek Behaviour Control state can't be read!" & @CRLF & "Please restore the config file to its initial state")
 	EndIf
 
 
@@ -696,7 +703,7 @@ Func DrawElements()
 	ElseIf $stateextra[1] = 2 Then
 		GUICtrlSetState($peekmainno, $GUI_CHECKED)
 	Else
-		MsgBox($MB_ICONWARNING, "Error Reading Value", "Peek Main Control state can't be read!" & @CRLF & "Please edit the Config file yourself.")
+		MsgBox($MB_ICONWARNING, "Error Reading Value", "Peek Main Control state can't be read!" & @CRLF & "Please restore the config file to its initial state")
 	EndIf
 
 
@@ -728,12 +735,12 @@ Func DrawElements()
 	GUICtrlSetFont(-1, $leftLB / 5.5, 200, 0, "Candara", 2)
 	GUICtrlSetTip(-1, "No icon in system tray when TranslucentTB is running.")
 
-	if $stateextra[3] = 1 Then
+	If $stateextra[3] = 1 Then
 		GUICtrlSetState($trayyes, $GUI_CHECKED)
 	ElseIf $stateextra[3] = 2 Then
 		GUICtrlSetState($trayno, $GUI_CHECKED)
 	Else
-		MsgBox($MB_ICONWARNING, "Error Reading Value", "System Tray Icon control state can't be read!" & @CRLF & "Please edit the Config file yourself.")
+		MsgBox($MB_ICONWARNING, "Error Reading Value", "System Tray Icon control state can't be read!" & @CRLF & "Please restore the config file to its initial state")
 	EndIf
 
 
@@ -748,12 +755,12 @@ Func DrawElements()
 	GUICtrlSetFont(-1, $leftLB / 5.5, 200, 0, "Candara", 2)
 	GUICtrlSetTip(-1, "more informative logging. Can make huge log files.")
 
-	if $stateextra[4] = 1 Then
+	If $stateextra[4] = 1 Then
 		GUICtrlSetState($loggingyes, $GUI_CHECKED)
 	ElseIf $stateextra[4] = 2 Then
 		GUICtrlSetState($loggingno, $GUI_CHECKED)
 	Else
-		MsgBox($MB_ICONWARNING, "Error Reading Value", "Logging state control state can't be read!" & @CRLF & "Please edit the Config file yourself.")
+		MsgBox($MB_ICONWARNING, "Error Reading Value", "Logging state control state can't be read!" & @CRLF & "Please restore the config file to its initial state")
 	EndIf
 
 
@@ -769,7 +776,7 @@ Func DrawElements()
 
 	Global $finalpreview = GUICtrlCreateButton("Preview", $size[2] / 1.17, $topLB * 25.5, $leftLB * 3, $topLB * 1.5)
 	GUICtrlSetFont(-1, $leftLB / 5, $FW_EXTRALIGHT, 0, "Segoe UI", 2)
-	GUICtrlSetTip(-1, "Apply current settings and preview", "", 1, BitOR(1, 2))  ;& @CRLF & "ALLOW SOME SECONDS to open setting and detect current colour"
+	GUICtrlSetTip(-1, "Apply on-screen settings and preview. To revert click load.", "", 1, BitOR(1, 2))  ;& @CRLF & "ALLOW SOME SECONDS to open setting and detect current colour"
 
 	Global $finalsave = GUICtrlCreateButton("Save", $size[2] / 1.17, $topLB * 28, $leftLB * 3, $topLB * 1.5)
 	GUICtrlSetFont(-1, $leftLB / 5, $FW_EXTRALIGHT, 0, "Segoe UI", 2)
@@ -790,7 +797,7 @@ Func DrawElements()
 		advanceshow()
 
 	Else
-		MsgBox($MB_ICONWARNING, "Error Reading Value", "Standard/Advance Control state can't be read!" & @CRLF & "Please edit the Config file yourself.")
+		MsgBox($MB_ICONWARNING, "Error Reading Value", "Standard/Advance Control state can't be read!" & @CRLF & "Please restore the config file to its initial state")
 
 
 
@@ -885,7 +892,7 @@ Func main()
 					GUICtrlSetState($InputBox_1, $GUI_DISABLE)
 					$stateRB[0] = 3
 
-				Case $Radio1_4, $Radio1_5
+				Case $Radio1_4
 					GUICtrlSetState($Slider_1, $GUI_ENABLE)
 					GUICtrlSetState($InputBox_1, $GUI_ENABLE)
 					$stateRB[0] = 4
@@ -1088,44 +1095,9 @@ Func main()
 
 				Case $btauto
 
-
-					Opt("MouseCoordMode", 0)
-					Send("#r")
-					Sleep(500)
-					Send("ms-settings:colors{ENTER}")
-					Opt("SendKeyDelay", 1)
-
-					;wait for settings to start by checking visible text on the window is 'Settings'
-					While 1
-						Local $text = WinGetText("[ACTIVE]")
-						if Not StringInStr($text, "Settings") = 0 Then
-							ExitLoop
-						Else
-							Sleep(50)
-						EndIf
-
-						WinActivate("Settings")
-					WEnd
-
-
-					;bring settings to focus
-					WinActivate("Settings")
-
-					Opt("SendKeyDelay", 5)
-
-					;reach down
-					Send("{TAB 11}")
-					Send("{ENTER}")
-					Sleep(500)
-					Send("{TAB 2}")
-					Send("{ENTER}")
-					Send("{TAB 5}")
-					Send("{RIGHT} +{RIGHT 6}")
-					Send("^{INSERT}") ;language agnostic copy
-
-					$colour = ClipGet()
-					ProcessClose("SystemSettings.exe")
-					ProcessWaitClose("SystemSettings.exe")
+					$colour = Hex(RegRead("HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Themes\History\Colors", "ColorHistory0"))
+					$colour = StringRight($colour, 6)
+					$colour = StringRight($colour, 2) & StringMid($colour, 3, 2) & StringLeft($colour, 2)
 
 					GUICtrlSetImage($preview, "")
 					GUICtrlSetState($arrow, $GUI_HIDE)
@@ -1133,18 +1105,15 @@ Func main()
 					GUICtrlSetBkColor($colourout, "0x" & $colour)
 					GUICtrlSetData($colourtext, $colour)
 
-					Opt("SendKeyDelay", 1)
-
 
 
 				Case $bteye
-
 
 					$sTempFile = _TempFile(@TempDir, "\" & "colour_Sample_", ".jpg", 3)
 
 					GUISetState(@SW_MINIMIZE)
 
-					while 1
+					While 1
 						If _IsPressed("01") Then
 							ExitLoop
 						EndIf
@@ -1172,7 +1141,7 @@ Func main()
 					;ShellExecute($sTempFile)
 					;MsgBox(0, "Pixel Color", $colour)
 					_GDIPlus_ImageDispose($hImage)
-					_GDIPlus_ShutDown()
+					_GDIPlus_Shutdown()
 
 
 
@@ -1182,15 +1151,15 @@ Func main()
 					GUICtrlSetState($arrow, $GUI_HIDE)
 					GUICtrlSetImage($preview, "")
 					; Load cursor
-			   #cs
+					#cs
 					Dim $aPalette[20] = _
-							[0xFFFFFF, 0x000000, 0xC0C0C0, 0x808080, _
-							0xFF0000, 0x800000, 0xFFFF00, 0x808000, _
-							0x00FF00, 0x008000, 0x00FFFF, 0x008080, _
-							0x0000FF, 0x000080, 0xFF00FF, 0x800080, _
-							0xC0DCC0, 0xA6CAF0, 0xFFFBF0, 0xA0A0A4]
+						[0xFFFFFF, 0x000000, 0xC0C0C0, 0x808080, _
+						0xFF0000, 0x800000, 0xFFFF00, 0x808000, _
+						0x00FF00, 0x008000, 0x00FFFF, 0x008080, _
+						0x0000FF, 0x000080, 0xFF00FF, 0x800080, _
+						0xC0DCC0, 0xA6CAF0, 0xFFFBF0, 0xA0A0A4]
 
-			   #ce
+					#ce
 					$colour = Hex(_GUIColorPicker_GetColor($btpick), 6)
 					GUICtrlSetBkColor($colourout, "0x" & $colour)
 					GUICtrlSetData($colourtext, $colour)
@@ -1207,13 +1176,29 @@ Func main()
 				Case $trayno
 					$stateextra[3] = 2
 
+
+
+
+
+				Case $finalload
+					fload()
+
+				Case $finalpreview
+					fpreview()
+
+				Case $finalsave
+					fsave()
+
+
+
+
 				Case $GUI_EVENT_RESIZED
-				   Sleep(50)
+					Sleep(50)
 					uirefresh()
-				 Case $GUI_EVENT_MAXIMIZE
+				Case $GUI_EVENT_MAXIMIZE
 					uirefresh()
 					$max = True
-				 Case $GUI_EVENT_RESTORE
+				Case $GUI_EVENT_RESTORE
 					Sleep(50)
 					If $max Then
 						uirefresh()
@@ -1422,6 +1407,490 @@ EndFunc   ;==>main
 
 
 
+Func fload()
+
+
+	If $previewactive Then
+		$previewactive = False
+		ProcessClose("TranslucentTB.exe")
+		ProcessWaitClose("TranslucentTB.exe")
+		FileCopy(@AppDataDir & "\TranslucentTB\con_edit.cfg", @AppDataDir & "\TranslucentTB\config.cfg", 1)
+		FileDelete(@AppDataDir & "\TranslucentTB\con_edit.cfg")
+
+		Run(StringLeft(@WindowsDir, 3) & "Program Files (x86)\TranslucentTB\TranslucentTB.exe")
+		ProcessWait("TranslucentTB.exe")
+		fload()
+	Else
+
+		Local $aLines
+		_FileReadToArray(@AppDataDir & "\TranslucentTB\config.cfg", $aLines, $FRTA_COUNT)
+		Local $count = 0
+		Local $replace
+		Local $position
+		Local $count1
+
+		For $i = 1 To $aLines[0]
+			$position = 0
+			For $j = 0 To (StringLen($aLines[$i]) - 1)
+				If (StringMid($aLines[$i], $j, 1) == Chr(59)) Then
+					ExitLoop
+				ElseIf (StringMid($aLines[$i], $j, 1) == Chr(61)) Then
+					$count += 1
+					$position = $j
+					$count1 = $count
+					ExitLoop
+				EndIf
+			Next
+
+			Switch ($count1)
+				Case 0
+
+
+				Case 1
+					$value = StringMid($aLines[$i], $position + 1, 4)
+					;MsgBox(0, "", $value)
+					If StringInStr("Clear", $value, 0) Then
+						$stateRB[0] = 1
+						$count1 = 0
+					ElseIf StringInStr("Fluent", $value, 0) Then
+						$stateRB[0] = 2
+						$count1 = 0
+					ElseIf StringInStr("Opaque", $value, 0) Then
+						$stateRB[0] = 3
+						$count1 = 0
+					ElseIf StringInStr("Normal", $value, 0) Then
+						$stateRB[0] = 4
+						$count1 = 0
+					ElseIf StringInStr("Blur", $value, 0) Then
+						$stateRB[0] = 5
+						$count1 = 0
+					Else
+						MsgBox($MB_ICONWARNING, "Error Reading Value", "Global Taskbar blur style incorrect in config." & @CRLF & "Please restore the config file to its initial state")
+					EndIf
+
+				Case 2
+					$value = StringMid($aLines[$i], $position + 1, 6)
+					;MsgBox(0, "", $value)
+					$colourset[0] = $value
+					$count1 = 0
+
+				Case 3
+					$value = StringMid($aLines[$i], $position + 1, 3)
+					$stateBLUR[0] = Number($value)
+					;MsgBox(0, "", $stateBLUR[0])
+					$count1 = 0
+
+				Case 4
+					$value = StringMid($aLines[$i], $position + 1, 5)
+					;MsgBox(0, "", $value)
+					If StringInStr("Enable", $value, 0) Then
+						$stateCB[0] = True
+						$count1 = 0
+					ElseIf StringInStr("Disable", $value, 0) Then
+						$stateCB[0] = False
+						$count1 = 0
+					Else
+						MsgBox($MB_ICONWARNING, "Error Reading Value", "Window Maximised checkbox value incorrect in config." & @CRLF & "Please restore the config file to its initial state")
+					EndIf
+
+				Case 5
+					$value = StringMid($aLines[$i], $position + 1, 4)
+					;MsgBox(0, "", $value)
+					If StringInStr("Clear", $value, 0) Then
+						$stateRB[1] = 1
+						$count1 = 0
+					ElseIf StringInStr("Fluent", $value, 0) Then
+						$stateRB[1] = 2
+						$count1 = 0
+					ElseIf StringInStr("Opaque", $value, 0) Then
+						$stateRB[1] = 3
+						$count1 = 0
+					ElseIf StringInStr("Normal", $value, 0) Then
+						$stateRB[1] = 4
+						$count1 = 0
+					ElseIf StringInStr("Blur", $value, 0) Then
+						$stateRB[1] = 5
+						$count1 = 0
+					Else
+						MsgBox($MB_ICONWARNING, "Error Reading Value", "Window Maximised blur style incorrect in config." & @CRLF & "Please restore the config file to its initial state")
+					EndIf
+
+				Case 6
+					$value = StringMid($aLines[$i], $position + 1, 6)
+					;MsgBox(0, "", $value)
+					$colourset[1] = $value
+					$count1 = 0
+
+				Case 7
+					$value = StringMid($aLines[$i], $position + 1, 3)
+					$stateBLUR[1] = Number($value)
+					;MsgBox(0, "", $stateBLUR[0])
+					$count1 = 0
+
+				Case 9
+					$value = StringMid($aLines[$i], $position + 1, 5)
+					;MsgBox(0, "", $value)
+					If StringInStr("Enable", $value, 0) Then
+						$stateCB[1] = True
+						$count1 = 0
+					ElseIf StringInStr("Disable", $value, 0) Then
+						$stateCB[1] = False
+						$count1 = 0
+					Else
+						MsgBox($MB_ICONWARNING, "Error Reading Value", "Dynamic Start checkbox value incorrect in config." & @CRLF & "Please restore the config file to its initial state")
+					EndIf
+
+				Case 10
+					$value = StringMid($aLines[$i], $position + 1, 4)
+					;MsgBox(0, "", $value)
+					If StringInStr("Clear", $value, 0) Then
+						$stateRB[2] = 1
+						$count1 = 0
+					ElseIf StringInStr("Fluent", $value, 0) Then
+						$stateRB[2] = 2
+						$count1 = 0
+					ElseIf StringInStr("Opaque", $value, 0) Then
+						$stateRB[2] = 3
+						$count1 = 0
+					ElseIf StringInStr("Normal", $value, 0) Then
+						$stateRB[2] = 4
+						$count1 = 0
+					ElseIf StringInStr("Blur", $value, 0) Then
+						$stateRB[2] = 5
+						$count1 = 0
+					Else
+						MsgBox($MB_ICONWARNING, "Error Reading Value", "Dynamic Start blur style incorrect in config." & @CRLF & "Please restore the config file to its initial state")
+					EndIf
+
+				Case 11
+					$value = StringMid($aLines[$i], $position + 1, 6)
+					;MsgBox(0, "", $value)
+					$colourset[2] = $value
+					$count1 = 0
+
+				Case 12
+					$value = StringMid($aLines[$i], $position + 1, 3)
+					$stateBLUR[2] = Number($value)
+					;MsgBox(0, "", $stateBLUR[0])
+					$count1 = 0
+
+				Case 13
+					$value = StringMid($aLines[$i], $position + 1, 5)
+					;MsgBox(0, "", $value)
+					If StringInStr("Enable", $value, 0) Then
+						$stateCB[2] = True
+						$count1 = 0
+					ElseIf StringInStr("Disable", $value, 0) Then
+						$stateCB[2] = False
+						$count1 = 0
+					Else
+						MsgBox($MB_ICONWARNING, "Error Reading Value", "Cortana checkbox value incorrect in config." & @CRLF & "Please restore the config file to its initial state")
+					EndIf
+
+				Case 14
+					$value = StringMid($aLines[$i], $position + 1, 4)
+					;MsgBox(0, "", $value)
+					If StringInStr("Clear", $value, 0) Then
+						$stateRB[3] = 1
+						$count1 = 0
+					ElseIf StringInStr("Fluent", $value, 0) Then
+						$stateRB[3] = 2
+						$count1 = 0
+					ElseIf StringInStr("Opaque", $value, 0) Then
+						$stateRB[3] = 3
+						$count1 = 0
+					ElseIf StringInStr("Normal", $value, 0) Then
+						$stateRB[3] = 4
+						$count1 = 0
+					ElseIf StringInStr("Blur", $value, 0) Then
+						$stateRB[3] = 5
+						$count1 = 0
+					Else
+						MsgBox($MB_ICONWARNING, "Error Reading Value", "Cortana blur style incorrect in config." & @CRLF & "Please restore the config file to its initial state")
+					EndIf
+
+				Case 15
+					$value = StringMid($aLines[$i], $position + 1, 6)
+					;MsgBox(0, "", $value)
+					$colourset[3] = $value
+					$count1 = 0
+
+				Case 16
+					$value = StringMid($aLines[$i], $position + 1, 3)
+					$stateBLUR[3] = Number($value)
+					;MsgBox(0, "", $stateBLUR[0])
+					$count1 = 0
+
+				Case 17
+					$value = StringMid($aLines[$i], $position + 1, 5)
+					;MsgBox(0, "", $value)
+					If StringInStr("Enable", $value, 0) Then
+						$stateCB[3] = True
+						$count1 = 0
+					ElseIf StringInStr("Disable", $value, 0) Then
+						$stateCB[3] = False
+						$count1 = 0
+					Else
+						MsgBox($MB_ICONWARNING, "Error Reading Value", "Timeline checkbox value incorrect in config." & @CRLF & "Please restore the config file to its initial state")
+					EndIf
+
+				Case 18
+					$value = StringMid($aLines[$i], $position + 1, 4)
+					;MsgBox(0, "", $value)
+					If StringInStr("Clear", $value, 0) Then
+						$stateRB[4] = 1
+						$count1 = 0
+					ElseIf StringInStr("Fluent", $value, 0) Then
+						$stateRB[4] = 2
+						$count1 = 0
+					ElseIf StringInStr("Opaque", $value, 0) Then
+						$stateRB[4] = 3
+						$count1 = 0
+					ElseIf StringInStr("Normal", $value, 0) Then
+						$stateRB[4] = 4
+						$count1 = 0
+					ElseIf StringInStr("Blur", $value, 0) Then
+						$stateRB[4] = 5
+						$count1 = 0
+					Else
+						MsgBox($MB_ICONWARNING, "Error Reading Value", "Timeline blur style incorrect in config." & @CRLF & "Please restore the config file to its initial state")
+					EndIf
+
+				Case 19
+					$value = StringMid($aLines[$i], $position + 1, 6)
+					;MsgBox(0, "", $value)
+					$colourset[4] = $value
+					$count1 = 0
+
+				Case 20
+					$value = StringMid($aLines[$i], $position + 1, 3)
+					$stateBLUR[4] = Number($value)
+					;MsgBox(0, "", $stateBLUR[0])
+					$count1 = 0
+
+				Case 21
+					$value = StringMid($aLines[$i], $position + 1, 4)
+					;MsgBox(0, "", $value)
+					If StringInStr("Dynamic", $value, 0) Then
+						$stateextra[0] = 1
+						$count1 = 0
+					ElseIf StringInStr("Show", $value, 0) Then
+						$stateextra[0] = 2
+						$count1 = 0
+					ElseIf StringInStr("Hide", $value, 0) Then
+						$stateextra[0] = 3
+						$count1 = 0
+					Else
+						MsgBox($MB_ICONWARNING, "Error Reading Value", "Aero Peek value incorrect in config." & @CRLF & "Please restore the config file to its initial state")
+					EndIf
+
+				Case 22
+					$value = StringMid($aLines[$i], $position + 1, 5)
+					;MsgBox(0, "", $value)
+					If StringInStr("Enable", $value, 0) Then
+						$stateextra[1] = 1
+						$count1 = 0
+					ElseIf StringInStr("Disable", $value, 0) Then
+						$stateextra[1] = 2
+						$count1 = 0
+					Else
+						MsgBox($MB_ICONWARNING, "Error Reading Value", "Peek only main value incorrect in config." & @CRLF & "Please restore the config file to its initial state")
+					EndIf
+
+				Case 23
+					$value = StringMid($aLines[$i], $position + 1, 5)
+					$stateextra[2] = Number($value)
+					;MsgBox(0, "", $stateBLUR[0])
+					$count1 = 0
+
+				Case 24
+					$value = StringMid($aLines[$i], $position + 1, 5)
+					;MsgBox(0, "", $value)
+					If StringInStr("Enable", $value, 0) Then
+						$stateextra[3] = 2
+						$count1 = 0
+					ElseIf StringInStr("Disable", $value, 0) Then
+						$stateextra[3] = 1
+						$count1 = 0
+					Else
+						MsgBox($MB_ICONWARNING, "Error Reading Value", "System tray icon state incorrect in config." & @CRLF & "Please restore the config file to its initial state")
+					EndIf
+
+				Case 25
+					$value = StringMid($aLines[$i], $position + 1, 5)
+					;MsgBox(0, "", $value)
+					If StringInStr("Enable", $value, 0) Then
+						$stateextra[4] = 1
+						$count1 = 0
+					ElseIf StringInStr("Disable", $value, 0) Then
+						$stateextra[4] = 2
+						$count1 = 0
+					Else
+						MsgBox($MB_ICONWARNING, "Error Reading Value", "Verbose Logging state incorrect in config." & @CRLF & "Please restore the config file to its initial state")
+					EndIf
+
+			EndSwitch
+
+		Next
+
+
+		uirefresh()
+	EndIf
+
+	Return
+
+
+EndFunc   ;==>fload
+
+
+Func fpreview()
+
+	$previewactive = True
+	ProcessClose("TranslucentTB.exe")
+	ProcessWaitClose("TranslucentTB.exe")
+	FileCopy(@AppDataDir & "\TranslucentTB\config.cfg", @AppDataDir & "\TranslucentTB\con_edit.cfg", 8)
+
+
+	Local $aConfig
+	_FileReadToArray(@AppDataDir & "\TranslucentTB\config.cfg", $aConfig)
+
+	For $i = 1 To $aConfig[0]
+		If StringInStr($aConfig[$i], "accent=", 0, 1, 1 , 7) Then
+			$aConfig[$i] = ("accent=" & rbconvert($stateRB[0]))
+
+		ElseIf StringInStr($aConfig[$i], "color=", 0, 1, 1 , 6) Then
+			$aConfig[$i] = ("color=" & $colourset[0])
+
+		ElseIf StringInStr($aConfig[$i], "opacity=", 0, 1, 1 , 8) Then
+			$aConfig[$i] = ("opacity=" & $stateBLUR[0])
+
+
+
+
+		ElseIf StringInStr($aConfig[$i], "dynamic-ws=", 0, 1) Then
+			$aConfig[$i] = "dynamic-ws=" & ($stateCB[0] ? "enable" : "disable")
+
+		ElseIf StringInStr($aConfig[$i], "dynamic-ws-accent=", 0, 1) Then
+			$aConfig[$i] = "dynamic-ws-accent=" & rbconvert($stateRB[1])
+
+		ElseIf StringInStr($aConfig[$i], "dynamic-ws-color=", 0, 1) Then
+			$aConfig[$i] = "dynamic-ws-color=" & $colourset[1]
+
+		ElseIf StringInStr($aConfig[$i], "dynamic-ws-opacity=", 0, 1) Then
+			$aConfig[$i] = "dynamic-ws-opacity=" & $stateBLUR[1]
+
+
+
+
+		ElseIf StringInStr($aConfig[$i], "dynamic-start=", 0, 1) Then
+			$aConfig[$i] = "dynamic-start=" & ($stateCB[1] ? "enable" : "disable")
+
+		ElseIf StringInStr($aConfig[$i], "dynamic-start-accent=", 0, 1) Then
+			$aConfig[$i] = "dynamic-start-accent=" & rbconvert($stateRB[2])
+
+		ElseIf StringInStr($aConfig[$i], "dynamic-start-color=", 0, 1) Then
+			$aConfig[$i] = "dynamic-start-color=" & $colourset[2]
+
+		ElseIf StringInStr($aConfig[$i], "dynamic-start-opacity=", 0, 1) Then
+			$aConfig[$i] = "dynamic-start-opacity=" & $stateBLUR[2]
+
+
+
+
+		ElseIf StringInStr($aConfig[$i], "dynamic-cortana=", 0, 1) Then
+			$aConfig[$i] = "dynamic-cortana=" & ($stateCB[2] ? "enable" : "disable")
+
+		ElseIf StringInStr($aConfig[$i], "dynamic-cortana-accent=", 0, 1) Then
+			$aConfig[$i] = "dynamic-cortana-accent=" & rbconvert($stateRB[3])
+
+		ElseIf StringInStr($aConfig[$i], "dynamic-cortana-color=", 0, 1) Then
+			$aConfig[$i] = "dynamic-cortana-color=" & $colourset[3]
+
+		ElseIf StringInStr($aConfig[$i], "dynamic-cortana-opacity=", 0, 1) Then
+			$aConfig[$i] = "dynamic-cortana-opacity=" & $stateBLUR[3]
+
+
+
+
+		ElseIf StringInStr($aConfig[$i], "dynamic-timeline=", 0, 1) Then
+			$aConfig[$i] = "dynamic-timeline=" & ($stateCB[3] ? "enable" : "disable")
+
+		ElseIf StringInStr($aConfig[$i], "dynamic-timeline-accent=", 0, 1) Then
+			$aConfig[$i] = "dynamic-timeline-accent=" & rbconvert($stateRB[4])
+
+		ElseIf StringInStr($aConfig[$i], "dynamic-timeline-color=", 0, 1) Then
+			$aConfig[$i] = "dynamic-timeline-color=" & $colourset[4]
+
+		ElseIf StringInStr($aConfig[$i], "dynamic-timeline-opacity=", 0, 1) Then
+			$aConfig[$i] = "dynamic-timeline-opacity=" & $stateBLUR[4]
+
+
+
+
+
+		ElseIf StringInStr($aConfig[$i], "peek=", 0, 1) Then
+			$aConfig[$i] = "peek=" & ($stateextra[0] == 1 ? "dynamic" : ($stateextra[0] == 2 ? "show" : "hide"))
+
+		ElseIf StringInStr($aConfig[$i], "peek-only-main=", 0, 1) Then
+			$aConfig[$i] = "peek-only-main=" & ($stateextra[1] ? "enable" : "disable")
+
+		ElseIf StringInStr($aConfig[$i], "sleep-time=", 0, 1) Then
+			$aConfig[$i] = "sleep-time=" & $stateextra[2]
+
+		ElseIf StringInStr($aConfig[$i], "no-tray=", 0, 1) Then
+			$aConfig[$i] = "no-tray=" & ($stateextra[3] ? "disable" : "enable")
+
+		ElseIf StringInStr($aConfig[$i], "verbose=", 0, 1) Then
+			$aConfig[$i] = "verbose=" & ($stateextra[4] ? "enable" : "disable")
+
+
+		EndIf
+
+
+
+	Next
+
+	_FileWriteFromArray(@AppDataDir & "\TranslucentTB\config.cfg", $aConfig, 1)
+
+	Run(StringLeft(@WindowsDir, 3) & "Program Files (x86)\TranslucentTB\TranslucentTB.exe")
+	ProcessWait("TranslucentTB.exe")
+
+	_ArrayDisplay($aConfig)
+
+	Return
+
+
+EndFunc   ;==>fpreview
+
+Func fsave()
+
+	If Not $previewactive Then fpreview()
+	FileDelete(@AppDataDir & "\TranslucentTB\con_edit.cfg")
+
+
+	Return
+
+
+EndFunc   ;==>fsave
+
+
+
+Func rbconvert($num)
+	If $num == 1 Then
+		Return "clear"
+	ElseIf $num == 2 Then
+		Return "fluent"
+	ElseIf $num == 3 Then
+		Return "opaque"
+	ElseIf $num == 4 Then
+		Return "normal"
+	ElseIf $num == 5 Then
+		Return "blur"
+	EndIf
+
+EndFunc   ;==>rbconvert
+
+
 
 Func uirefresh()
 
@@ -1484,8 +1953,8 @@ Func uirefresh()
 	GUICtrlDelete($paletteGR)
 	GUICtrlDelete($btauto)
 	GUICtrlDelete($bteye)
-	 _GUIColorPicker_Delete($btpick)  ;this screwed with me a lot, and for a LONG while
-	 GUICtrlDelete($btpick)
+	_GUIColorPicker_Delete($btpick)   ;this screwed with me a lot, and for a LONG while
+	GUICtrlDelete($btpick)
 
 	GUICtrlDelete($preview)
 	GUICtrlDelete($arrow)
