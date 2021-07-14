@@ -47,17 +47,16 @@ Because TranslucentTB has it's limitations.
   <br/>
   
   
-  ## **BUT THERE ARE NO SHORTCUTS IN LIFE!**
+  ## **Featuring :**
   
-  Well, there are, when you're dealing with computers. Here's what "Colours" does
   
-  ◦ Opens settings and checks for currently selected.
+  ◦ Ability to detect accent colour from Registry.
   
-  ◦ Takes the HEX of that colour.
+  ◦ A simple intuitive UI for changing taskbar style.
   
-  ◦ Open the TranslucentTB config file and update to the new colour.
+  ◦ A roburst colour picker for all your colouring needs.
   
-  ◦ Restart TranslucentTB for changes to take effect.
+  ◦ Months of work for something no one's gonna look at. (Windows 11 must die)
   
   
   <br/>
