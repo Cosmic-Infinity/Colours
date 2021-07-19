@@ -1,3 +1,13 @@
+#Region ;**** Directives created by AutoIt3Wrapper_GUI ****
+#AutoIt3Wrapper_Icon=assets\ColoursIconNew85.ico
+#AutoIt3Wrapper_Res_HiDpi=y
+#AutoIt3Wrapper_Res_Icon_Add=assets\ColoursIconNew16.ico
+#AutoIt3Wrapper_Res_Icon_Add=assets\ColoursIconNew24.ico
+#AutoIt3Wrapper_Res_Icon_Add=assets\ColoursIconNew32.ico
+#AutoIt3Wrapper_Res_Icon_Add=assets\ColoursIconNew48.ico
+#AutoIt3Wrapper_Run_Au3Stripper=y
+#Au3Stripper_Parameters=/so /rm /pe
+#EndRegion ;**** Directives created by AutoIt3Wrapper_GUI ****
 #cs ----------------------------------------------------------------------------
 
  AutoIt Version: 3.3.14.5
@@ -6,7 +16,6 @@
 
 
 #ce ----------------------------------------------------------------------------
-
 
 #include <GUIConstantsEx.au3>
 ;#include <MsgBoxConstants.au3>
@@ -26,22 +35,6 @@
 ;#include <StringConstants.au3> ;for string constants
 #include <File.au3>
 
-
-
-
-#AutoIt3Wrapper_Icon="C:\Users\Shubham\Documents\GitHub\Colours\assets\Colours-Icon-new-85.ico" ;optional
-
-;!Highly recommended for improved overall performance and responsiveness of the GUI effects etc.! (after compiling):
-#AutoIt3Wrapper_Run_Au3Stripper=y
-#Au3Stripper_Parameters=/so /rm /pe
-;Required if you want High DPI scaling enabled.
-#AutoIt3Wrapper_Res_HiDpi=y
-
-
-
-Global $sfilepath = "C:\Users\Shubham\Desktop\colourstarget.txt"
-
-;_ReplaceStringInFile ( $sFilePath, "color", "colours", 0 , 0 )
 
 ;Control temporary state /  reading file state on launch
 Global $max
@@ -79,7 +72,7 @@ $colourset[4] = ""
 Global $stateextra[5]
 $stateextra[0] = 1
 $stateextra[1] = 1
-$stateextra[2] = 69
+$stateextra[2] = 50
 $stateextra[3] = 1
 $stateextra[4] = 1
 
@@ -92,38 +85,42 @@ Global $colour = "FFFFFF"             ;detected/extracted/selected colour
 ;$iScale=$iScale/1.5 ;scale correction relative to my display's scaling
 
 
+If FileExists(@AppDataDir & "\TranslucentTB\colours.txt") Then
+	Local $value = FileReadLine(@AppDataDir & "\TranslucentTB\colours.txt", 1)
+	If StringInStr($value, "std", 0, 1) Then
+		$stateCB[4] = True
+	ElseIf StringInStr($value, "adv", 0, 1) Then
+		$stateCB[4] = False
+	EndIf
+Else
+	_FileCreate(@AppDataDir & "\TranslucentTB\colours.txt")
+	_FileWriteToLine(@AppDataDir & "\TranslucentTB\colours.txt", 1, "std", True, True)
+EndIf
 
-
+If Not FileExists(@AppDataDir & "\TranslucentTB\config.cfg") Then
+	Exit
+EndIf
 
 DrawWin()
-DrawElements()
 fload()
+DrawElements()
 main()
 
 
 
 Func DrawWin()
 	If @OSVersion = 'WIN_10' Then DllCall("User32.dll", "bool", "SetProcessDpiAwarenessContext", "HWND", "DPI_AWARENESS_CONTEXT" - 2)
-
 	Global $gui = GUICreate("Colours GUI", @DesktopWidth / 1.28, @DesktopHeight / 1.2855, -1, -1, BitOR($WS_SYSMENU, $WS_MINIMIZEBOX, $WS_SIZEBOX, $WS_MAXIMIZEBOX))
-	;1500, 840
-	GUISetIcon("C:\Users\Shubham\Documents\GitHub\Colours\assets\ColoursIconNew16.ico")
-	TraySetIcon("C:\Users\Shubham\Documents\GitHub\Colours\assets\ColoursIconNew32.ico")
-	GUISetBkColor(0x00FFFFFF) ; will change background color
-
-	;sw enable
+	GUISetIcon("assets\ColoursIconNew24.ico")
+	TraySetIcon("assets\ColoursIconNew48.ico")
+	GUISetBkColor(0x00FFFFFF)
 	GUISetState()
 EndFunc   ;==>DrawWin
 
 
-
-
-
 Func DrawElements()
 
-
 	Local $size = WinGetPos($gui)
-
 	Local $leftLB = $size[2] / 30 ;50
 	Local $topLB = $size[3] / 33.6 ;25
 	Local $heightLB = $topLB * 5 ;125
@@ -131,18 +128,10 @@ Func DrawElements()
 
 	;------------------------------------------------------------------------------TASKBAR------------------------------------------------------------------------
 
-
-
 	Global $taskbarGR = GUICtrlCreateGroup("Desktop / Global Taskbar", $leftLB, $topLB, $lengthtLB, $heightLB)
 	GUICtrlSetFont($taskbarGR, ($topLB / 2), 600, 0, "Segoe UI", 5)
 	;font weight, font attribute, font name, quality
 
-
-	;clear (default), fluent (only on build 17063 and up), opaque, normal, or blur.
-
-
-	;Global $check1 = GUICtrlCreateCheckbox(" ", $leftLB * (2 / 5), ($topLB) + $heightLB / 2)
-	;GUICtrlSetState($check1, $GUI_CHECKED)
 	GUIStartGroup()
 	Global $Radio1_1 = GUICtrlCreateRadio("Clear", ($leftLB * 2.3), ($heightLB) - ($heightLB * 0.46), $lengthtLB / 6.3)
 	GUICtrlSetFont($Radio1_1, $leftLB / 5, $FW_EXTRALIGHT, 0, "Candara", 2)
@@ -161,20 +150,13 @@ Func DrawElements()
 	GUICtrlSetTip(-1, "Will make the taskbar slightly blurred.")
 
 
-
 	Global $Slider_1 = GUICtrlCreateSlider(($leftLB * 1.5), ($heightLB) - ($heightLB * 0.2), ($lengthtLB * (5.15 / 6)), $heightLB / 3.3 < 45 ? $heightLB / 3.3 : 45, -1) ;slider 1
 	GUICtrlSetLimit($Slider_1, 255, 0) ; change min/max value,
 	GUICtrlSetTip(-1, "Set transparency level" & @CRLF & "0 = Completely Transparent" & @CRLF & "255 = Completely Opaque")
-	GUICtrlSetData($Slider_1, $stateBLUR[0]) ; set cursor
+	GUICtrlSetData($Slider_1, $stateBLUR[0])
 
 	Global $InputBox_1 = GUICtrlCreateInput($stateBLUR[0], ($lengthtLB * 0.99), ($heightLB) - ($heightLB * 0.17), @DesktopWidth / 51, $heightLB / 4.5 < 31 ? $heightLB / 4.5 : 30, $ES_NUMBER) ; ;textbox 1
-	GUICtrlSetLimit(-1, 3) ;-1 means last created control
-
-
-
-
-
-	;$stateRB[0] = 1
+	GUICtrlSetLimit(-1, 3) ;-1 = last created control
 
 
 	If $stateRB[0] = 1 Then
@@ -194,22 +176,11 @@ Func DrawElements()
 	EndIf
 
 
-
-
-
-
-
-
-
-
-
 	;--------------------Dynamic Windows. State to use when a window is maximised.--------------------------------------------------
-
 
 
 	Global $maximisedGR = GUICtrlCreateGroup("Window Maximised", $leftLB, $topLB * 2 + $heightLB, $lengthtLB, $heightLB)
 	GUICtrlSetFont($maximisedGR, ($topLB / 2.1), 600, 0, "Segoe UI", 5)
-	;clear (default), fluent (only on build 17063 and up), opaque, normal, or blur.
 
 	Global $check2 = GUICtrlCreateCheckbox(" ", $leftLB * (2 / 5), ($topLB * 2) + $heightLB * (3 / 2))
 	GUICtrlSetState($check2, $GUI_CHECKED)
@@ -231,9 +202,6 @@ Func DrawElements()
 	GUICtrlSetFont(-1, $leftLB / 5, $FW_EXTRALIGHT, 0, "Candara", 2)
 	GUICtrlSetTip(-1, "Will make the taskbar slightly blurred.")
 
-
-
-
 	;slider 2
 	Global $Slider_2 = GUICtrlCreateSlider($lengthtLB / 9, $heightLB + $topLB + ($heightLB) - ($heightLB * 0.2), ($lengthtLB * (5.15 / 6)), $heightLB / 3.3 < 45 ? $heightLB / 3.3 : 45, -1)
 	GUICtrlSetLimit($Slider_2, 255, 0) ; change min/max value,
@@ -243,7 +211,6 @@ Func DrawElements()
 	Global $InputBox_2 = GUICtrlCreateInput($stateBLUR[1], ($lengthtLB * 0.99), $topLB + $heightLB + ($heightLB) - ($heightLB * 0.17), @DesktopWidth / 51, $heightLB / 4.5 < 31 ? $heightLB / 4.5 : 30, $ES_NUMBER) ; create input box
 	GUICtrlSetLimit(-1, 3)
 
-	;$stateRB[1] = 2
 
 	If $stateRB[1] = 1 Then
 		GUICtrlSetState($Radio2_1, $GUI_CHECKED)
@@ -261,10 +228,6 @@ Func DrawElements()
 		MsgBox($MB_ICONWARNING, "Error Reading Value", "Window Maximised accent can't be read!" & @CRLF & "Please restore the config file to its initial state")
 	EndIf
 
-
-	;$stateCB[0] = False
-
-
 	If $stateCB[0] = False Then
 		GUICtrlSetState($check2, $GUI_UNCHECKED)
 		GUICtrlSetState($Radio2_1, $GUI_DISABLE)
@@ -277,12 +240,7 @@ Func DrawElements()
 	EndIf
 
 
-
-
-
-
 	;------------------Dynamic Start. State to use when the start menu is opened.-------------------------------------------------------------------
-
 
 
 	Global $startGR = GUICtrlCreateGroup("Start Menu Open", $leftLB, ($topLB * 3) + ($heightLB * 2), $lengthtLB, $heightLB)
@@ -309,8 +267,6 @@ Func DrawElements()
 	GUICtrlSetFont(-1, $leftLB / 5, $FW_EXTRALIGHT, 0, "Candara", 2)
 	GUICtrlSetTip(-1, "Will make the taskbar slightly blurred.")
 
-
-
 	Global $Slider_3 = GUICtrlCreateSlider($lengthtLB / 9, ($topLB * 2) + ($heightLB * 2) + ($heightLB) - ($heightLB * 0.2), ($lengthtLB * (5.15 / 6)), $heightLB / 3.3 < 45 ? $heightLB / 3.3 : 45, -1) ;slider 3
 	GUICtrlSetLimit($Slider_3, 255, 0) ; change min/max value,
 	GUICtrlSetTip(-1, "Set transparency level" & @CRLF & "0 = Completely Transparent" & @CRLF & "255 = Completely Opaque")
@@ -319,7 +275,6 @@ Func DrawElements()
 	Global $InputBox_3 = GUICtrlCreateInput($stateBLUR[2], ($lengthtLB * 0.99), ($topLB * 2) + ($heightLB * 2) + ($heightLB) - ($heightLB * 0.17), @DesktopWidth / 51, $heightLB / 4.5 < 31 ? $heightLB / 4.5 : 30, $ES_NUMBER) ;textbox 3
 	GUICtrlSetLimit(-1, 3)
 
-	;$stateRB[2] = 3
 
 	If $stateRB[2] = 1 Then
 		GUICtrlSetState($Radio3_1, $GUI_CHECKED)
@@ -338,9 +293,6 @@ Func DrawElements()
 	EndIf
 
 
-	;$stateCB[1] = False
-
-
 	If $stateCB[1] = False Then
 		GUICtrlSetState($check3, $GUI_UNCHECKED)
 		GUICtrlSetState($Radio3_1, $GUI_DISABLE)
@@ -352,11 +304,7 @@ Func DrawElements()
 		GUICtrlSetState($InputBox_3, $GUI_DISABLE)
 	EndIf
 
-
-
-
 	;-------------------Dynamic Cortana. State to use when Cortana or the search menu is opened.----------------------------------------------------------------------
-
 
 
 	Global $cortanaGR = GUICtrlCreateGroup("Cortana Open", $leftLB, ($topLB * 4) + ($heightLB * 3), $lengthtLB, $heightLB)
@@ -383,9 +331,6 @@ Func DrawElements()
 	GUICtrlSetFont(-1, $leftLB / 5, $FW_EXTRALIGHT, 0, "Candara", 2)
 	GUICtrlSetTip(-1, "Will make the taskbar slightly blurred.")
 
-
-
-
 	Global $Slider_4 = GUICtrlCreateSlider($lengthtLB / 9, ($topLB * 3) + ($heightLB * 3) + ($heightLB) - ($heightLB * 0.2), ($lengthtLB * (5.15 / 6)), $heightLB / 3.3 < 45 ? $heightLB / 3.3 : 45, -1) ;slider 4
 	GUICtrlSetLimit($Slider_4, 255, 0) ; change min/max value,
 	GUICtrlSetTip(-1, "Set transparency level" & @CRLF & "0 = Completely Transparent" & @CRLF & "255 = Completely Opaque")
@@ -394,8 +339,6 @@ Func DrawElements()
 	Global $InputBox_4 = GUICtrlCreateInput($stateBLUR[3], ($lengthtLB * 0.99), ($topLB * 3) + ($heightLB * 3) + ($heightLB) - ($heightLB * 0.17), @DesktopWidth / 51, $heightLB / 4.5 < 31 ? $heightLB / 4.5 : 30, $ES_NUMBER) ;textbox 4
 	GUICtrlSetLimit(-1, 3)
 
-
-	;$stateRB[3] = 4
 
 	If $stateRB[3] = 1 Then
 		GUICtrlSetState($Radio4_1, $GUI_CHECKED)
@@ -413,10 +356,6 @@ Func DrawElements()
 		MsgBox($MB_ICONWARNING, "Error Reading Value", "Cortana menu accent can't be read!" & @CRLF & "Please restore the config file to its initial state")
 	EndIf
 
-
-	;$stateCB[2] = False
-
-
 	If $stateCB[2] = False Then
 		GUICtrlSetState($check4, $GUI_UNCHECKED)
 		GUICtrlSetState($Radio4_1, $GUI_DISABLE)
@@ -428,12 +367,7 @@ Func DrawElements()
 		GUICtrlSetState($InputBox_4, $GUI_DISABLE)
 	EndIf
 
-
-
-
 	;------------------Dynamic Timeline. State to use when the timeline (or task view on older builds) is opened.---------------------------------------------------------------------------------------
-
-
 
 	Global $timelineGR = GUICtrlCreateGroup("Timeline Open", $leftLB, ($topLB * 5) + ($heightLB * 4), $lengthtLB, $heightLB)
 	GUICtrlSetFont($timelineGR, ($topLB / 2.1), 600, 0, "Segoe UI", 5)
@@ -460,8 +394,6 @@ Func DrawElements()
 	GUICtrlSetTip(-1, "Will make the taskbar slightly blurred.")
 
 
-
-
 	Global $Slider_5 = GUICtrlCreateSlider($lengthtLB / 9, ($topLB * 4) + ($heightLB * 4) + ($heightLB) - ($heightLB * 0.2), ($lengthtLB * (5.15 / 6)), $heightLB / 3.3 < 45 ? $heightLB / 3.3 : 45, -1) ;slider 5
 	GUICtrlSetLimit($Slider_5, 255, 0) ; change min/max value,
 	GUICtrlSetTip(-1, "Set transparency level" & @CRLF & "0 = Completely Transparent" & @CRLF & "255 = Completely Opaque")
@@ -469,8 +401,6 @@ Func DrawElements()
 
 	Global $InputBox_5 = GUICtrlCreateInput($stateBLUR[4], ($lengthtLB * 0.99), ($topLB * 4) + ($heightLB * 4) + ($heightLB) - ($heightLB * 0.17), @DesktopWidth / 51, $heightLB / 4.5 < 31 ? $heightLB / 4.5 : 30, $ES_NUMBER) ;textbox 5
 	GUICtrlSetLimit(-1, 3)
-
-	;$stateRB[4] = 5
 
 	If $stateRB[4] = 1 Then
 		GUICtrlSetState($Radio5_1, $GUI_CHECKED)
@@ -488,10 +418,6 @@ Func DrawElements()
 		MsgBox($MB_ICONWARNING, "Error Reading Value", "Timeline accent can't be read!" & @CRLF & "Please restore the config file to its initial state")
 	EndIf
 
-
-	;$stateCB[3] = False
-
-
 	If $stateCB[3] = False Then
 		GUICtrlSetState($check5, $GUI_UNCHECKED)
 		GUICtrlSetState($Radio5_1, $GUI_DISABLE)
@@ -503,17 +429,10 @@ Func DrawElements()
 		GUICtrlSetState($InputBox_5, $GUI_DISABLE)
 	EndIf
 
-
-
-
-
-
-
 	;---------------------------------------------------Advance / Simple -------------------------------------------------------
 
 	Global $separate = GUICtrlCreateGraphic($size[2] / 1.9, $topLB, 1, $heightLB * 5.9, $SS_BLACKRECT)
 	Global $separate2 = GUICtrlCreateGraphic($size[2] / 1.9, $topLB * 4, $size[2] / 2.3, 1, $SS_BLACKRECT)
-
 
 	Global $StandardCtrl = GUICtrlCreateCheckbox("Standard Mode", $size[2] / 1.7, $topLB * 1.5, $size[2] / 8)
 	GUICtrlSetFont(-1, $leftLB / 5, $FW_EXTRALIGHT, 0, "Candara", 2)
@@ -524,19 +443,11 @@ Func DrawElements()
 
 	;BitOR($SS_CENTER, $SS_CENTERIMAGE)
 
-
-
-
-
-
-
 	;----------------------------------------------------colour palette------------------------------------------------------------
-
 
 
 	Global $paletteGR = GUICtrlCreateGroup("Colour Selection", $size[2] / 1.81, $topLB * 5, $size[2] / 2.5, $heightLB * 1.5)
 	GUICtrlSetFont(-1, ($topLB / 2.1), 500, 0, "Segoe UI", 5)
-
 
 	Global $btauto = GUICtrlCreateButton("Autodetect", $size[2] / 1.72, $topLB * 7, $leftLB * 3, $topLB * 1.3)
 	GUICtrlSetFont(-1, $leftLB / 5, $FW_EXTRALIGHT, 0, "Candara", 2)
@@ -545,18 +456,40 @@ Func DrawElements()
 	GUICtrlSetFont(-1, $leftLB / 5, $FW_EXTRALIGHT, 0, "Candara", 2)
 	GUICtrlSetTip(-1, "Turns the mouse into an Eyedropper" & @CRLF & "allowing selection of any colour from UI." & @CRLF & "NOTE : Temporarily hides this Window till colour selection.", "Eyedropper", 1, BitOR(1, 2)) ;@CRLF & "Samples 2 pixels diagonally above the mouse pointer."
 
-	; Create Picker1 with custom cursor
-	Global $btpick = _GUIColorPicker_Create("Colour Picker", $size[2] / 1.21, $topLB * 7, $leftLB * 3, $topLB * 1.3, "0x" & $colour, BitOR($CP_FLAG_CHOOSERBUTTON, $CP_FLAG_ARROWSTYLE, $CP_FLAG_MOUSEWHEEL), '', 0, -1, -1, 'Pick a Colour', 'More')
+	Global $btpick = _GUIColorPicker_Create("Colour Picker", $size[2] / 1.21, $topLB * 7, $leftLB * 3, $topLB * 1.3, "0x" & $colour, BitOR($CP_FLAG_CHOOSERBUTTON, $CP_FLAG_ARROWSTYLE, $CP_FLAG_MOUSEWHEEL), ''         , 8              , 6                 , -1       , 'Pick one', 'More')
+										;  ( $sText,        $iLeft,          $iTop,      $iWidth,     $iHeight   [, $iRGB        [, $iFlags                                                               [, $aPalette [, $iWidthPalette [, $iHeightPalette [, $hCursor [, $sTitle [, $sButton [, $sColorFunc]]]]]]]]] )
+	#cs
+					Dim $aPalette[20] = _
+						[0xFFFFFF, 0x000000, 0xC0C0C0, 0x808080, _
+						0xFF0000, 0x800000, 0xFFFF00, 0x808000, _
+						0x00FF00, 0x008000, 0x00FFFF, 0x008080, _
+						0x0000FF, 0x000080, 0xFF00FF, 0x800080, _
+						0xC0DCC0, 0xA6CAF0, 0xFFFBF0, 0xA0A0A4]
+
+					#ce
+	;_GUIColorPicker_SetPalette ( $btpick, $aPalette )
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 	GUICtrlSetFont(-1, $leftLB / 5, $FW_EXTRALIGHT, 0, "Candara", 2)
 	GUICtrlSetTip(-1, "Choose from a colour palette", "Colour Picker", 1, BitOR(1, 2))
-
-
-
-
-
-
-
 
 
 	Global $preview = GUICtrlCreatePic($sTempFile, $size[2] / 1.62, $topLB * 9.5, $leftLB, $topLB * 2)
@@ -581,27 +514,11 @@ Func DrawElements()
 	GUICtrlSetFont(-1, $leftLB / 5, $FW_EXTRALIGHT, 0, "Segoe UI", 2)
 	GUICtrlSetTip(-1, "HEX value of the colour.", "Colour Hex Viewer", 0, BitOR(1, 1))
 
-
-
-
-
-
-
-
-
-
 	;----------------------------------------------------apply colour to---------------------------------------------------------------
-
-
-
-
-
-
 
 
 	Global $applyGR = GUICtrlCreateGroup("Apply Colour", $size[2] / 1.81, $topLB * 13, $size[2] / 2.5, $heightLB * 1.6)
 	GUICtrlSetFont(-1, ($topLB / 2.1), 500, 0, "Segoe UI", 5)
-
 
 
 	Global $colourset_tas = GUICtrlCreateLabel("Desktop :", $size[2] / 1.7, $topLB * 14.8, $leftLB * 2.0, $topLB * 1.45)
@@ -612,7 +529,6 @@ Func DrawElements()
 	GUICtrlSetData($colourset_tastx, $colourset[0])
 	GUICtrlSetFont(-1, $leftLB / 5.5, $FW_EXTRALIGHT, 0, "Segoe UI", 2)
 	GUICtrlSetTip(-1, "Colour for taskbar on Desktop.")
-
 
 	Global $colourset_max = GUICtrlCreateLabel("Maximised :", $size[2] / 1.3, $topLB * 14.8, $leftLB * 2.2, $topLB * 1.45)
 	GUICtrlSetFont(-1, $leftLB / 5, $FW_EXTRALIGHT, 0, "Candara", 2)
@@ -631,7 +547,6 @@ Func DrawElements()
 	GUICtrlSetData($colourset_statx, $colourset[2])
 	GUICtrlSetFont(-1, $leftLB / 5.5, $FW_EXTRALIGHT, 0, "Segoe UI", 2)
 	GUICtrlSetTip(-1, "Colour for taskbar during Start")
-
 
 	Global $colourset_cor = GUICtrlCreateLabel("Cortana    :", $size[2] / 1.3, $topLB * 16.8, $leftLB * 2.0, $topLB * 1.45)
 	GUICtrlSetFont(-1, $leftLB / 5, $FW_EXTRALIGHT, 0, "Candara", 2)
@@ -652,17 +567,10 @@ Func DrawElements()
 	GUICtrlSetTip(-1, "Colour for taskbar wne Timeline open.")
 
 
-
-
-
-
-
-
 	;------------------------------------------------------ aero peek behaviour---------------------------------------------------
 
 	Global $peekGR = GUICtrlCreateGroup("Aero Peek", $size[2] / 1.81, $topLB * 21.3, $size[2] / 8.3, $heightLB * 1.9)
 	GUICtrlSetFont(-1, ($topLB / 2.1), 500, 0, "Segoe UI", 5)
-
 
 	GUIStartGroup()
 	Global $peekdynamic = GUICtrlCreateRadio("Dynamic", $size[2] / 1.73, $topLB * 23, ($lengthtLB / 6.3))
@@ -685,17 +593,16 @@ Func DrawElements()
 		MsgBox($MB_ICONWARNING, "Error Reading Value", "Peek Behaviour Control state can't be read!" & @CRLF & "Please restore the config file to its initial state")
 	EndIf
 
-
 	Global $peekmain = GUICtrlCreateLabel("Peek only main ", $size[2] / 1.755, $topLB * 28, $leftLB * 2.5, $topLB * 1.45)
 	GUICtrlSetFont(-1, $leftLB / 5, $FW_EXTRALIGHT, 0, "Candara", 2)
 
 	GUIStartGroup()
 	Global $peekmainyes = GUICtrlCreateRadio("Yes", $size[2] / 1.75, $topLB * 29.3, ($lengthtLB / 9.5))
 	GUICtrlSetFont(-1, $leftLB / 5.5, 200, 0, "Candara", 2)
-	GUICtrlSetTip(-1, "Decides whether only the main monitor is considered when dynamic peek is enabled.")
+	GUICtrlSetTip(-1, "Decides whether only the main monitor is considered when dynamic peek is enabled." & @CRLF & "Only for multi monitor setup.")
 	Global $peekmainno = GUICtrlCreateRadio("No", $size[2] / 1.61, $topLB * 29.3, ($lengthtLB / 12))
 	GUICtrlSetFont(-1, $leftLB / 5.5, 200, 0, "Candara", 2)
-	GUICtrlSetTip(-1, "Decides whether only the main monitor is considered when dynamic peek is enabled.")
+	GUICtrlSetTip(-1, "Decides whether only the main monitor is considered when dynamic peek is enabled." & @CRLF & "Only for multi monitor setup.")
 	GUICtrlSetState($peekmain, $GUI_CHECKED)
 
 	If $stateextra[1] = 1 Then
@@ -705,9 +612,6 @@ Func DrawElements()
 	Else
 		MsgBox($MB_ICONWARNING, "Error Reading Value", "Peek Main Control state can't be read!" & @CRLF & "Please restore the config file to its initial state")
 	EndIf
-
-
-
 
 	;--------------------------------------------------------- extras ----------------------------------------------------------
 
@@ -722,7 +626,6 @@ Func DrawElements()
 	GUICtrlSetData($sleeptime_tx, $stateextra[2])
 	GUICtrlSetFont(-1, $leftLB / 5.5, $FW_EXTRALIGHT, 0, "Segoe UI", 2)
 	GUICtrlSetTip(-1, "Sleep time in milliseconds." & @CRLF & "a shorter time reduces flicker when opening start" & @CRLF & "but results in higher CPU usage." & @CRLF & "Default is 10.")
-
 
 	Global $systemtray = GUICtrlCreateLabel("System Tray icon", $size[2] / 1.42, $topLB * 25, $leftLB * 3, $topLB * 1.3)
 	GUICtrlSetFont(-1, $leftLB / 5, $FW_EXTRALIGHT, 0, "Candara", 2)
@@ -763,11 +666,6 @@ Func DrawElements()
 		MsgBox($MB_ICONWARNING, "Error Reading Value", "Logging state control state can't be read!" & @CRLF & "Please restore the config file to its initial state")
 	EndIf
 
-
-
-
-
-
 	;---------------------------------------------------final buttons---------------------------------------------------------
 
 	Global $finalload = GUICtrlCreateButton("Load", $size[2] / 1.17, $topLB * 23, $leftLB * 3, $topLB * 1.5)
@@ -782,13 +680,8 @@ Func DrawElements()
 	GUICtrlSetFont(-1, $leftLB / 5, $FW_EXTRALIGHT, 0, "Segoe UI", 2)
 	GUICtrlSetTip(-1, "Apply and Save current settings.", "", 1, BitOR(1, 2))  ;& @CRLF & "ALLOW SOME SECONDS to open setting and detect current colour"
 
-
-
-
-
 	;-----------------------------------------------------hide buttons for standarad controls------------------------------------------------
 
-	;$stateCB[4] = False
 
 	If $stateCB[4] = True Then
 		advancehide()
@@ -799,20 +692,7 @@ Func DrawElements()
 	Else
 		MsgBox($MB_ICONWARNING, "Error Reading Value", "Standard/Advance Control state can't be read!" & @CRLF & "Please restore the config file to its initial state")
 
-
-
 	EndIf
-
-
-
-
-
-
-
-
-
-
-
 
 	Return
 
@@ -820,18 +700,7 @@ EndFunc   ;==>DrawElements
 
 
 
-
-
-
-
-
-
-
-
-
-
 Func main()
-
 
 	;------------------------------------Sliider Behaviour and InputBox Link---------------------------------------------
 	Local $check_Slide1[2]
@@ -840,13 +709,23 @@ Func main()
 	Local $check_Slide4[2]
 	Local $check_Slide5[2]
 
-
-
 	Do
-
 		Local $n = GUIGetMsg()
 
-		If $n = $GUI_EVENT_CLOSE Then Exit
+		If $n = $GUI_EVENT_CLOSE Then
+
+			If FileExists($sTempFile) Then
+				FileDelete($sTempFile)
+			EndIf
+			If FileExists(@AppDataDir & "\TranslucentTB\conf_backup.cfg") Then
+				ProcessClose("TranslucentTB.exe")
+				ProcessWaitClose("TranslucentTB.exe")
+				FileCopy(@AppDataDir & "\TranslucentTB\conf_backup.cfg", @AppDataDir & "\TranslucentTB\config.cfg", 1)
+				FileDelete(@AppDataDir & "\TranslucentTB\conf_backup.cfg")
+			EndIf
+
+			Exit
+		EndIf
 		Local $Info = GUIGetCursorInfo()
 
 
@@ -854,29 +733,6 @@ Func main()
 
 		Else
 			Switch $n
-
-				#cs
-				Case $check1
-					If GUICtrlRead($check1) = $GUI_UNCHECKED Then
-						GUICtrlSetState($Radio1_1, $GUI_DISABLE)
-						GUICtrlSetState($Radio1_2, $GUI_DISABLE)
-						GUICtrlSetState($Radio1_3, $GUI_DISABLE)
-						GUICtrlSetState($Radio1_4, $GUI_DISABLE)
-						GUICtrlSetState($Radio1_5, $GUI_DISABLE)
-						GUICtrlSetState($Slider_1, $GUI_DISABLE)
-						GUICtrlSetState($InputBox_1, $GUI_DISABLE)
-					Else
-						GUICtrlSetState($Radio1_1, $GUI_ENABLE)
-						GUICtrlSetState($Radio1_2, $GUI_ENABLE)
-						GUICtrlSetState($Radio1_3, $GUI_ENABLE)
-						GUICtrlSetState($Radio1_4, $GUI_ENABLE)
-						GUICtrlSetState($Radio1_5, $GUI_ENABLE)
-						If GUICtrlRead($Radio1_3) = $GUI_UNCHECKED Then
-							GUICtrlSetState($Slider_1, $GUI_ENABLE)
-							GUICtrlSetState($InputBox_1, $GUI_ENABLE)
-						EndIf
-					EndIf
-				#ce
 
 				Case $Radio1_1
 					GUICtrlSetState($Slider_1, $GUI_ENABLE)
@@ -1082,16 +938,15 @@ Func main()
 					GUICtrlSetState($InputBox_5, $GUI_ENABLE)
 					$stateRB[4] = 5
 
-
-
 				Case $StandardCtrl
 					advancehide()
 					$stateCB[4] = True
+					_FileWriteToLine(@AppDataDir & "\TranslucentTB\colours.txt", 1, "std", True, True)
 
 				Case $AdvanceCtrl
 					advanceshow()
 					$stateCB[4] = False
-
+					_FileWriteToLine(@AppDataDir & "\TranslucentTB\colours.txt", 1, "adv", True, True)
 
 				Case $btauto
 
@@ -1100,15 +955,20 @@ Func main()
 					$colour = StringRight($colour, 2) & StringMid($colour, 3, 2) & StringLeft($colour, 2)
 
 					GUICtrlSetImage($preview, "")
+					If FileExists($sTempFile) Then
+						FileDelete($sTempFile)
+					EndIf
+
 					GUICtrlSetState($arrow, $GUI_HIDE)
 
 					GUICtrlSetBkColor($colourout, "0x" & $colour)
 					GUICtrlSetData($colourtext, $colour)
 
-
-
 				Case $bteye
 
+					If FileExists($sTempFile) Then
+						FileDelete($sTempFile)
+					EndIf
 					$sTempFile = _TempFile(@TempDir, "\" & "colour_Sample_", ".jpg", 3)
 
 					GUISetState(@SW_MINIMIZE)
@@ -1143,23 +1003,14 @@ Func main()
 					_GDIPlus_ImageDispose($hImage)
 					_GDIPlus_Shutdown()
 
-
-
 				Case $btpick
-
 
 					GUICtrlSetState($arrow, $GUI_HIDE)
 					GUICtrlSetImage($preview, "")
-					; Load cursor
-					#cs
-					Dim $aPalette[20] = _
-						[0xFFFFFF, 0x000000, 0xC0C0C0, 0x808080, _
-						0xFF0000, 0x800000, 0xFFFF00, 0x808000, _
-						0x00FF00, 0x008000, 0x00FFFF, 0x008080, _
-						0x0000FF, 0x000080, 0xFF00FF, 0x800080, _
-						0xC0DCC0, 0xA6CAF0, 0xFFFBF0, 0xA0A0A4]
+					If FileExists($sTempFile) Then
+						FileDelete($sTempFile)
+					EndIf
 
-					#ce
 					$colour = Hex(_GUIColorPicker_GetColor($btpick), 6)
 					GUICtrlSetBkColor($colourout, "0x" & $colour)
 					GUICtrlSetData($colourtext, $colour)
@@ -1171,26 +1022,31 @@ Func main()
 				Case $peekhide
 					$stateextra[0] = 3
 
+				Case $peekmainyes
+					$stateextra[1] = 1
+				Case $peekmainno
+					$stateextra[1] = 2
+
 				Case $trayyes
 					$stateextra[3] = 1
 				Case $trayno
 					$stateextra[3] = 2
 
-
-
+				Case $loggingyes
+					$stateextra[4] = 1
+				Case $loggingno
+					$stateextra[4] = 2
 
 
 				Case $finalload
 					fload()
+					uirefresh()
 
 				Case $finalpreview
 					fpreview()
 
 				Case $finalsave
 					fsave()
-
-
-
 
 				Case $GUI_EVENT_RESIZED
 					Sleep(50)
@@ -1205,17 +1061,7 @@ Func main()
 						$max = False ;unnessary refresh on window restored after being minimised fix
 					EndIf
 
-
-
 			EndSwitch
-
-
-
-
-
-
-			;Sleep(60)
-
 
 
 
@@ -1300,7 +1146,6 @@ Func main()
 				$check_Slide5[0] = False
 
 			EndIf
-
 
 
 			If $check_Slide1[1] = True Then
@@ -1388,19 +1233,9 @@ Func main()
 			EndIf
 
 
-
-
-
-
 		EndIf ;minimise/outer click error mitigation endif
 
 	Until $n = $GUI_EVENT_CLOSE
-
-
-
-
-
-
 
 
 EndFunc   ;==>main
@@ -1409,17 +1244,18 @@ EndFunc   ;==>main
 
 Func fload()
 
-
 	If $previewactive Then
 		$previewactive = False
 		ProcessClose("TranslucentTB.exe")
 		ProcessWaitClose("TranslucentTB.exe")
-		FileCopy(@AppDataDir & "\TranslucentTB\con_edit.cfg", @AppDataDir & "\TranslucentTB\config.cfg", 1)
-		FileDelete(@AppDataDir & "\TranslucentTB\con_edit.cfg")
+		FileCopy(@AppDataDir & "\TranslucentTB\conf_backup.cfg", @AppDataDir & "\TranslucentTB\config.cfg", 1)
+		FileDelete(@AppDataDir & "\TranslucentTB\conf_backup.cfg")
+		;source, destination
 
 		Run(StringLeft(@WindowsDir, 3) & "Program Files (x86)\TranslucentTB\TranslucentTB.exe")
 		ProcessWait("TranslucentTB.exe")
 		fload()
+		uirefresh() ;
 	Else
 
 		Local $aLines
@@ -1728,13 +1564,10 @@ Func fload()
 					Else
 						MsgBox($MB_ICONWARNING, "Error Reading Value", "Verbose Logging state incorrect in config." & @CRLF & "Please restore the config file to its initial state")
 					EndIf
-
 			EndSwitch
-
 		Next
 
-
-		uirefresh()
+		;uirefresh()
 	EndIf
 
 	Return
@@ -1748,20 +1581,20 @@ Func fpreview()
 	$previewactive = True
 	ProcessClose("TranslucentTB.exe")
 	ProcessWaitClose("TranslucentTB.exe")
-	FileCopy(@AppDataDir & "\TranslucentTB\config.cfg", @AppDataDir & "\TranslucentTB\con_edit.cfg", 8)
+	FileCopy(@AppDataDir & "\TranslucentTB\config.cfg", @AppDataDir & "\TranslucentTB\conf_backup.cfg", 8)
 
 
 	Local $aConfig
 	_FileReadToArray(@AppDataDir & "\TranslucentTB\config.cfg", $aConfig)
 
 	For $i = 1 To $aConfig[0]
-		If StringInStr($aConfig[$i], "accent=", 0, 1, 1 , 7) Then
+		If StringInStr($aConfig[$i], "accent=", 0, 1, 1, 7) Then
 			$aConfig[$i] = ("accent=" & rbconvert($stateRB[0]))
 
-		ElseIf StringInStr($aConfig[$i], "color=", 0, 1, 1 , 6) Then
+		ElseIf StringInStr($aConfig[$i], "color=", 0, 1, 1, 6) Then
 			$aConfig[$i] = ("color=" & $colourset[0])
 
-		ElseIf StringInStr($aConfig[$i], "opacity=", 0, 1, 1 , 8) Then
+		ElseIf StringInStr($aConfig[$i], "opacity=", 0, 1, 1, 8) Then
 			$aConfig[$i] = ("opacity=" & $stateBLUR[0])
 
 
@@ -1832,21 +1665,19 @@ Func fpreview()
 			$aConfig[$i] = "peek=" & ($stateextra[0] == 1 ? "dynamic" : ($stateextra[0] == 2 ? "show" : "hide"))
 
 		ElseIf StringInStr($aConfig[$i], "peek-only-main=", 0, 1) Then
-			$aConfig[$i] = "peek-only-main=" & ($stateextra[1] ? "enable" : "disable")
+			$aConfig[$i] = "peek-only-main=" & ($stateextra[1] == 1 ? "enable" : "disable")
 
 		ElseIf StringInStr($aConfig[$i], "sleep-time=", 0, 1) Then
 			$aConfig[$i] = "sleep-time=" & $stateextra[2]
 
 		ElseIf StringInStr($aConfig[$i], "no-tray=", 0, 1) Then
-			$aConfig[$i] = "no-tray=" & ($stateextra[3] ? "disable" : "enable")
+			$aConfig[$i] = "no-tray=" & ($stateextra[3] == 1 ? "disable" : "enable")
 
 		ElseIf StringInStr($aConfig[$i], "verbose=", 0, 1) Then
-			$aConfig[$i] = "verbose=" & ($stateextra[4] ? "enable" : "disable")
+			$aConfig[$i] = "verbose=" & ($stateextra[4] == 1 ? "enable" : "disable")
 
 
 		EndIf
-
-
 
 	Next
 
@@ -1865,11 +1696,8 @@ EndFunc   ;==>fpreview
 Func fsave()
 
 	If Not $previewactive Then fpreview()
-	FileDelete(@AppDataDir & "\TranslucentTB\con_edit.cfg")
-
-
+	FileDelete(@AppDataDir & "\TranslucentTB\conf_backup.cfg")
 	Return
-
 
 EndFunc   ;==>fsave
 
@@ -1887,13 +1715,11 @@ Func rbconvert($num)
 	ElseIf $num == 5 Then
 		Return "blur"
 	EndIf
-
 EndFunc   ;==>rbconvert
 
 
 
 Func uirefresh()
-
 
 	GUICtrlDelete($taskbarGR)
 	;GUICtrlDelete($check1)

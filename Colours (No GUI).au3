@@ -1,4 +1,10 @@
-#AutoIt3Wrapper_Icon= @ScriptDir & "\assets\ColoursIconNew85.ico" ;optional
+#Region ;**** Directives created by AutoIt3Wrapper_GUI ****
+#AutoIt3Wrapper_Icon=C:\Users\Shubham\Documents\GitHub\Colours\assets\ColoursIconNew85.ico
+#AutoIt3Wrapper_Compile_Both=y
+#AutoIt3Wrapper_UseX64=y
+#EndRegion ;**** Directives created by AutoIt3Wrapper_GUI ****
+;#AutoIt3Wrapper_Icon= @ScriptDir & "\assets\ColoursIconNew85.ico" ;optional
+TraySetIcon(@ScriptDir & "\assets\ColoursIconNew32.ico")
 #include <File.au3>
 
 Global $colour = ""
@@ -7,7 +13,6 @@ ApplyColour($colour)
 
 
 Func PickColour()
-
 	$colour = Hex(RegRead("HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Themes\History\Colors", "ColorHistory0"))
 	$colour = StringRight($colour, 6)
 	$colour = StringRight($colour, 2) & StringMid($colour, 3, 2) & StringLeft($colour, 2)
