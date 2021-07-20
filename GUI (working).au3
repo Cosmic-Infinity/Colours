@@ -1,5 +1,6 @@
 #Region ;**** Directives created by AutoIt3Wrapper_GUI ****
 #AutoIt3Wrapper_Icon=assets\ColoursIconNew85.ico
+#AutoIt3Wrapper_UseX64=y
 #AutoIt3Wrapper_Res_HiDpi=y
 #AutoIt3Wrapper_Res_Icon_Add=assets\ColoursIconNew16.ico
 #AutoIt3Wrapper_Res_Icon_Add=assets\ColoursIconNew24.ico
@@ -37,6 +38,8 @@
 
 
 ;Control temporary state /  reading file state on launch
+Global $appexit = False
+Global $installlocation = StringLeft(@WindowsDir, 3) & "Program Files (x86)\TranslucentTB\TranslucentTB.exe"
 Global $max
 Global $previewactive = False
 
@@ -81,25 +84,99 @@ Global $sTempFile                      ;trmporary file to save image file use fo
 Global $colour = "FFFFFF"             ;detected/extracted/selected colour
 
 
-;Global $iScale = RegRead("HKCU\Control Panel\Desktop\WindowMetrics", "AppliedDPI") / 96
-;$iScale=$iScale/1.5 ;scale correction relative to my display's scaling
+If Not FileExists(@AppDataDir & "\TranslucentTB\config.cfg") Then
+	Local $notfound = MsgBox(BitOR($MB_OK, $MB_SETFOREGROUND, $MB_ICONERROR), "Not Found!", "It seems like TranslucentTB's config file cannot be detected" & @CRLF & "Make sure :" & @CRLF & @CRLF & " Translucent TB config file is under %UserProfile%\AppData\Roaming\TranslucentTB\config.cfg")
+	Exit
+EndIf
 
-
-If FileExists(@AppDataDir & "\TranslucentTB\colours.txt") Then
-	Local $value = FileReadLine(@AppDataDir & "\TranslucentTB\colours.txt", 1)
+If FileExists(@AppDataDir & "\TranslucentTB\colours.cfg") Then
+	Local $value = FileReadLine(@AppDataDir & "\TranslucentTB\colours.cfg", 1)
 	If StringInStr($value, "std", 0, 1) Then
 		$stateCB[4] = True
 	ElseIf StringInStr($value, "adv", 0, 1) Then
 		$stateCB[4] = False
+	Else
+		_FileWriteToLine(@AppDataDir & "\TranslucentTB\colours.cfg", 1, "std", True, True)
+		$stateCB[4] = True
 	EndIf
+
+
+	$installlocation1 = FileReadLine(@AppDataDir & "\TranslucentTB\colours.cfg", 3)
+	If FileExists($installlocation1) Then
+		$installlocation = $installlocation1
+	Else
+		SetError(1)
+	EndIf
+
+
+	If @error Then
+
+		If FileExists($installlocation) Then
+			_FileWriteToLine(@AppDataDir & "\TranslucentTB\colours.cfg", 3, $installlocation, True, True)
+		Else
+			definepath()
+			_FileWriteToLine(@AppDataDir & "\TranslucentTB\colours.cfg", 3, $installlocation, True, True)
+			MsgBox(BitOR($MB_ICONINFORMATION, $MB_SETFOREGROUND), "Path Updated", "Restart Colours." &@CRLF& "If you believe wrong path has been provided, then delete this file" & @CRLF & @AppDataDir & "\TranslucentTB\colours.cfg")
+			Exit
+		EndIf
+	EndIf
+
+
 Else
-	_FileCreate(@AppDataDir & "\TranslucentTB\colours.txt")
-	_FileWriteToLine(@AppDataDir & "\TranslucentTB\colours.txt", 1, "std", True, True)
+	_FileCreate(@AppDataDir & "\TranslucentTB\colours.cfg")
+	_FileWriteToLine(@AppDataDir & "\TranslucentTB\colours.cfg", 1, "std", True, True)
+	$stateCB[4] = True
+
+	If FileExists($installlocation) Then
+		_FileWriteToLine(@AppDataDir & "\TranslucentTB\colours.cfg", 3, $installlocation, True, True)
+	Else
+		definepath()
+		_FileWriteToLine(@AppDataDir & "\TranslucentTB\colours.cfg", 3, $installlocation, True, True)
+		MsgBox(BitOR($MB_ICONINFORMATION, $MB_SETFOREGROUND), "Path Updated", "Restart Colours." &@CRLF& "If you believe wrong path has been provided, then delete this file" & @CRLF & @AppDataDir & "\TranslucentTB\colours.cfg")
+		Exit
+	EndIf
 EndIf
 
-If Not FileExists(@AppDataDir & "\TranslucentTB\config.cfg") Then
-	Exit
-EndIf
+Func definepath()
+	Local $notinstalled = MsgBox(BitOR($MB_YESNO, $MB_SETFOREGROUND, $MB_ICONWARNING), "Install Path", "It seems like TranslucentTB isn't installed in the default path." & @CRLF & "Would you like to mention a path?")
+	If $notinstalled = $IDYES Then
+		If @OSVersion = 'WIN_10' Then DllCall("User32.dll", "bool", "SetProcessDpiAwarenessContext", "HWND", "DPI_AWARENESS_CONTEXT" - 2)
+		Global $installgui = GUICreate("Installation Location", @DesktopWidth / 4, @DesktopHeight / 4, -1, -1, BitOR($WS_SYSMENU, $WS_MINIMIZEBOX, $WS_SIZEBOX, $WS_MAXIMIZEBOX))
+		GUISetIcon("assets\ColoursIconNew24.ico")
+		TraySetIcon("assets\ColoursIconNew48.ico")
+		GUISetBkColor(0x00FFFFFF)
+		GUISetState()
+
+		Local $size = WinGetPos($installgui)
+
+		Local $installlabel = GUICtrlCreateLabel("Path for TranslucentTB.exe without "" "": ", "", $size[3] * 0.15, $size[2], $size[3] / 5, $SS_CENTER + $SS_CENTERIMAGE)
+		GUICtrlSetFont(-1, 10, $FW_EXTRALIGHT, 0, "Segoe UI", 2)
+
+		Local $installtx = GUICtrlCreateInput("", $size[2] * 0.04, $size[3] * 0.5, $size[2] * 0.75, $size[3] * 0.15)
+		;GUICtrlSetLimit(-1, 6)
+		GUICtrlSetFont(-1, 10, $FW_EXTRALIGHT, 0, "Segoe UI", 2)
+		GUICtrlSetTip(-1, "Path for TranslucentTB.exe")
+
+		Local $installok = GUICtrlCreateButton("OK", $size[2] * 0.825, $size[3] * 0.5, $size[2] * 0.1, $size[3] * 0.15)
+		GUICtrlSetFont(-1, 10, $FW_EXTRALIGHT, 0, "Candara", 2)
+		GUICtrlSetTip(-1, "Once done, click here.")
+
+		Do
+			Local $n = GUIGetMsg()
+
+			Switch $n
+				Case $installok
+					$installlocation = GUICtrlRead($installtx)
+					Return
+			EndSwitch
+
+		Until $n = $GUI_EVENT_CLOSE
+
+	Else
+		Exit
+	EndIf
+EndFunc   ;==>definepath
+
 
 DrawWin()
 fload()
@@ -456,17 +533,28 @@ Func DrawElements()
 	GUICtrlSetFont(-1, $leftLB / 5, $FW_EXTRALIGHT, 0, "Candara", 2)
 	GUICtrlSetTip(-1, "Turns the mouse into an Eyedropper" & @CRLF & "allowing selection of any colour from UI." & @CRLF & "NOTE : Temporarily hides this Window till colour selection.", "Eyedropper", 1, BitOR(1, 2)) ;@CRLF & "Samples 2 pixels diagonally above the mouse pointer."
 
-	Global $btpick = _GUIColorPicker_Create("Colour Picker", $size[2] / 1.21, $topLB * 7, $leftLB * 3, $topLB * 1.3, "0x" & $colour, BitOR($CP_FLAG_CHOOSERBUTTON, $CP_FLAG_ARROWSTYLE, $CP_FLAG_MOUSEWHEEL), ''         , 8              , 6                 , -1       , 'Pick one', 'More')
-										;  ( $sText,        $iLeft,          $iTop,      $iWidth,     $iHeight   [, $iRGB        [, $iFlags                                                               [, $aPalette [, $iWidthPalette [, $iHeightPalette [, $hCursor [, $sTitle [, $sButton [, $sColorFunc]]]]]]]]] )
-	#cs
-					Dim $aPalette[20] = _
-						[0xFFFFFF, 0x000000, 0xC0C0C0, 0x808080, _
-						0xFF0000, 0x800000, 0xFFFF00, 0x808000, _
-						0x00FF00, 0x008000, 0x00FFFF, 0x008080, _
-						0x0000FF, 0x000080, 0xFF00FF, 0x800080, _
-						0xC0DCC0, 0xA6CAF0, 0xFFFBF0, 0xA0A0A4]
 
-					#ce
+
+	Dim $aPalette[48] = [0xFFB900, 0xFF8C00, 0xF7630C, 0xCA5010, _
+			0xDA3B01, 0xEF6950, 0xD13438, 0xFF4343, _
+			0xE74856, 0xE81123, 0xEA005E, 0xC30052, _
+			0xE3008C, 0xBF0077, 0xC239B3, 0x9A0089, _
+			0x0078D7, 0x0063B1, 0x8E8CD8, 0x6B69D6, _
+			0x8764B8, 0x744DA9, 0xB146C2, 0x881798, _
+			0x0099BC, 0x2D7D9A, 0x00B7C3, 0x038387, _
+			0x00B294, 0x018574, 0x00CC6A, 0x10893E, _
+			0x7A7574, 0x5D5A58, 0x68768A, 0x515C6B, _
+			0x567C73, 0x486860, 0x498205, 0x107C10, _
+			0x767676, 0x4C4A48, 0x69797E, 0x4A5459, _
+			0x647C64, 0x525E54, 0x847545, 0x7E735F]
+
+
+	Global $btpick = _GUIColorPicker_Create("Colour Picker", $size[2] / 1.21, $topLB * 7, $leftLB * 3, $topLB * 1.3, "0x" & $colour, BitOR($CP_FLAG_CHOOSERBUTTON, $CP_FLAG_ARROWSTYLE, $CP_FLAG_MOUSEWHEEL), $aPalette, 8, 6, -1, 'Pick one', 'More')
+	;  ( $sText,        $iLeft,          $iTop,      $iWidth,     $iHeight   [, $iRGB        [, $iFlags                                                               [, $aPalette [, $iWidthPalette [, $iHeightPalette [, $hCursor [, $sTitle [, $sButton [, $sColorFunc]]]]]]]]] )
+
+
+
+
 	;_GUIColorPicker_SetPalette ( $btpick, $aPalette )
 
 
@@ -714,18 +802,37 @@ Func main()
 
 		If $n = $GUI_EVENT_CLOSE Then
 
-			If FileExists($sTempFile) Then
-				FileDelete($sTempFile)
-			EndIf
 			If FileExists(@AppDataDir & "\TranslucentTB\conf_backup.cfg") Then
-				ProcessClose("TranslucentTB.exe")
-				ProcessWaitClose("TranslucentTB.exe")
-				FileCopy(@AppDataDir & "\TranslucentTB\conf_backup.cfg", @AppDataDir & "\TranslucentTB\config.cfg", 1)
-				FileDelete(@AppDataDir & "\TranslucentTB\conf_backup.cfg")
-			EndIf
+				Local $confirmexitsave = MsgBox(BitOR($MB_YESNOCANCEL, $MB_SETFOREGROUND, $MB_ICONQUESTION), "Save Changes?", "You have unsaved changes." & @CRLF & "Would you like to save them?")
+				If $confirmexitsave = $IDNO Then
+					ProcessClose("TranslucentTB.exe")
+					ProcessWaitClose("TranslucentTB.exe")
+					FileCopy(@AppDataDir & "\TranslucentTB\conf_backup.cfg", @AppDataDir & "\TranslucentTB\config.cfg", 1)
+					FileDelete(@AppDataDir & "\TranslucentTB\conf_backup.cfg")
 
-			Exit
+					If FileExists($sTempFile) Then
+						FileDelete($sTempFile)
+					EndIf
+
+					Run($installlocation)
+					ProcessWait("TranslucentTB.exe")
+					Exit
+
+				ElseIf $confirmexitsave = $IDYES Then
+					fsave()
+					If FileExists($sTempFile) Then
+						FileDelete($sTempFile)
+					EndIf
+					Exit
+				EndIf
+			Else
+				If FileExists($sTempFile) Then
+					FileDelete($sTempFile)
+				EndIf
+				Exit
+			EndIf
 		EndIf
+
 		Local $Info = GUIGetCursorInfo()
 
 
@@ -941,14 +1048,18 @@ Func main()
 				Case $StandardCtrl
 					advancehide()
 					$stateCB[4] = True
-					_FileWriteToLine(@AppDataDir & "\TranslucentTB\colours.txt", 1, "std", True, True)
+					_FileWriteToLine(@AppDataDir & "\TranslucentTB\colours.cfg", 1, "std", True, True)
 
 				Case $AdvanceCtrl
 					advanceshow()
 					$stateCB[4] = False
-					_FileWriteToLine(@AppDataDir & "\TranslucentTB\colours.txt", 1, "adv", True, True)
+					_FileWriteToLine(@AppDataDir & "\TranslucentTB\colours.cfg", 1, "adv", True, True)
 
 				Case $btauto
+
+					Local $old_cursor = MouseGetCursor()
+					GUISetCursor(15, 1, $gui)
+
 
 					$colour = Hex(RegRead("HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Themes\History\Colors", "ColorHistory0"))
 					$colour = StringRight($colour, 6)
@@ -960,11 +1071,14 @@ Func main()
 					EndIf
 
 					GUICtrlSetState($arrow, $GUI_HIDE)
-
 					GUICtrlSetBkColor($colourout, "0x" & $colour)
 					GUICtrlSetData($colourtext, $colour)
 
+					GUISetCursor($old_cursor, 1, $gui)
+
 				Case $bteye
+
+
 
 					If FileExists($sTempFile) Then
 						FileDelete($sTempFile)
@@ -972,6 +1086,8 @@ Func main()
 					$sTempFile = _TempFile(@TempDir, "\" & "colour_Sample_", ".jpg", 3)
 
 					GUISetState(@SW_MINIMIZE)
+
+
 
 					While 1
 						If _IsPressed("01") Then
@@ -998,6 +1114,8 @@ Func main()
 					$colour = Hex(_GDIPlus_BitmapGetPixel($hImage, $iPosX, $iPosY), 6)
 					GUICtrlSetBkColor($colourout, "0x" & $colour)
 					GUICtrlSetData($colourtext, $colour)
+
+
 					;ShellExecute($sTempFile)
 					;MsgBox(0, "Pixel Color", $colour)
 					_GDIPlus_ImageDispose($hImage)
@@ -1039,14 +1157,27 @@ Func main()
 
 
 				Case $finalload
+					Local $old_cursor = MouseGetCursor()
+					GUISetCursor(15, 1, $gui)
 					fload()
 					uirefresh()
+					GUISetCursor($old_cursor, 1, $gui)
 
 				Case $finalpreview
+					GUICtrlSetData($finalload, "Revert")
+					Local $old_cursor = MouseGetCursor()
+					GUISetCursor(15, 1, $gui)
 					fpreview()
+					GUISetCursor($old_cursor, 1, $gui)
+
 
 				Case $finalsave
+					GUICtrlSetData($finalload, "Load")
+					Local $old_cursor = MouseGetCursor()
+					GUISetCursor(15, 1, $gui)
 					fsave()
+					GUISetCursor($old_cursor, 1, $gui)
+
 
 				Case $GUI_EVENT_RESIZED
 					Sleep(50)
@@ -1235,7 +1366,7 @@ Func main()
 
 		EndIf ;minimise/outer click error mitigation endif
 
-	Until $n = $GUI_EVENT_CLOSE
+	Until $appexit
 
 
 EndFunc   ;==>main
@@ -1245,17 +1376,22 @@ EndFunc   ;==>main
 Func fload()
 
 	If $previewactive Then
-		$previewactive = False
-		ProcessClose("TranslucentTB.exe")
-		ProcessWaitClose("TranslucentTB.exe")
-		FileCopy(@AppDataDir & "\TranslucentTB\conf_backup.cfg", @AppDataDir & "\TranslucentTB\config.cfg", 1)
-		FileDelete(@AppDataDir & "\TranslucentTB\conf_backup.cfg")
-		;source, destination
+		Local $confirmrevert = MsgBox(BitOR($MB_YESNO, $MB_SETFOREGROUND, $MB_ICONQUESTION), "Revert Back?", "Would you like to revert back to original settings?")
 
-		Run(StringLeft(@WindowsDir, 3) & "Program Files (x86)\TranslucentTB\TranslucentTB.exe")
-		ProcessWait("TranslucentTB.exe")
-		fload()
-		uirefresh() ;
+		If $confirmrevert = $IDYES Then
+			GUICtrlSetData($finalload, "Load")
+			$previewactive = False
+			ProcessClose("TranslucentTB.exe")
+			ProcessWaitClose("TranslucentTB.exe")
+			FileCopy(@AppDataDir & "\TranslucentTB\conf_backup.cfg", @AppDataDir & "\TranslucentTB\config.cfg", 1)
+			FileDelete(@AppDataDir & "\TranslucentTB\conf_backup.cfg")
+			;source, destination
+
+			Run($installlocation)
+			ProcessWait("TranslucentTB.exe")
+			fload()
+			;uirefresh()
+		EndIf
 	Else
 
 		Local $aLines
@@ -1566,13 +1702,11 @@ Func fload()
 					EndIf
 			EndSwitch
 		Next
-
 		;uirefresh()
 	EndIf
 
+
 	Return
-
-
 EndFunc   ;==>fload
 
 
@@ -1683,10 +1817,10 @@ Func fpreview()
 
 	_FileWriteFromArray(@AppDataDir & "\TranslucentTB\config.cfg", $aConfig, 1)
 
-	Run(StringLeft(@WindowsDir, 3) & "Program Files (x86)\TranslucentTB\TranslucentTB.exe")
+	Run($installlocation)
 	ProcessWait("TranslucentTB.exe")
 
-	_ArrayDisplay($aConfig)
+	;_ArrayDisplay($aConfig)
 
 	Return
 
