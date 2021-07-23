@@ -1,4 +1,6 @@
-#AutoIt3Wrapper_Icon= @ScriptDir & "\assets\ColoursIconNew85.ico" ;optional
+#AutoIt3Wrapper_Icon= assets\ColoursIconNew85.ico;optional
+#AutoIt3Wrapper_Run_Au3Stripper=y
+#Au3Stripper_Parameters=/so /rm /pe
 TraySetIcon(@ScriptDir & "\assets\ColoursIconNew32.ico")
 #include <File.au3>
 #include <GUIConstants.au3>
