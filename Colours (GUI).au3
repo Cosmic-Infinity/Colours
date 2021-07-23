@@ -13,6 +13,7 @@
 
  AutoIt Version: 3.3.14.5
  Author:         Cosmic-Infinity
+ App Version:    3.0.0
 
 
 

@@ -1,6 +1,17 @@
 #AutoIt3Wrapper_Icon= assets\ColoursIconNew85.ico;optional
 #AutoIt3Wrapper_Run_Au3Stripper=y
 #Au3Stripper_Parameters=/so /rm /pe
+
+#cs ----------------------------------------------------------------------------
+
+ AutoIt Version: 3.3.14.5
+ Author:         Cosmic-Infinity
+ App Version:    3.0.0
+
+
+
+#ce ----------------------------------------------------------------------------
+
 TraySetIcon(@ScriptDir & "\assets\ColoursIconNew32.ico")
 #include <File.au3>
 #include <GUIConstants.au3>
