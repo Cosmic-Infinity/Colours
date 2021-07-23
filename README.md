@@ -54,7 +54,7 @@ Because TranslucentTB has it's limitations.
   
   ◦ A simple intuitive UI for changing taskbar style.
   
-  ◦ A roburst colour picker for all your colouring needs.
+  ◦ A robust colour picker for all your colouring needs.
   
   ◦ Months of work for something no one's gonna look at. (Windows 11 must die)
   
