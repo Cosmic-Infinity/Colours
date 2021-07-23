@@ -85,7 +85,7 @@ Global $colour = "FFFFFF"             ;detected/extracted/selected colour
 
 
 If Not FileExists(@AppDataDir & "\TranslucentTB\config.cfg") Then
-	Local $notfound = MsgBox(BitOR($MB_OK, $MB_SETFOREGROUND, $MB_ICONERROR), "Not Found!", "It seems like TranslucentTB's config file cannot be detected" & @CRLF & "Make sure :" & @CRLF & @CRLF & " Translucent TB config file is under %UserProfile%\AppData\Roaming\TranslucentTB\config.cfg")
+	Local $notfound = MsgBox(BitOR($MB_OK, $MB_SETFOREGROUND, $MB_ICONERROR), "Not Found!", "It seems like TranslucentTB's config file cannot be detected" & @CRLF & "Make sure :" & @CRLF & @CRLF & " 1. TranslucentTB is installed." & @CRLF & @CRLF & " 2. Translucent TB config file is under : "  &@CRLF&@CRLF&  @AppDataDir & " \TranslucentTB\config.cfg")
 	Exit
 EndIf
 
@@ -116,7 +116,7 @@ If FileExists(@AppDataDir & "\TranslucentTB\colours.cfg") Then
 		Else
 			definepath()
 			_FileWriteToLine(@AppDataDir & "\TranslucentTB\colours.cfg", 3, $installlocation, True, True)
-			MsgBox(BitOR($MB_ICONINFORMATION, $MB_SETFOREGROUND), "Path Updated", "Restart Colours." &@CRLF& "If you believe wrong path has been provided, then delete this file" & @CRLF & @AppDataDir & "\TranslucentTB\colours.cfg")
+			MsgBox(BitOR($MB_ICONINFORMATION, $MB_SETFOREGROUND), "Path Updated", "Restart Colours." &@CRLF& "If you run into issues, then delete this file" & @CRLF & @AppDataDir & "\TranslucentTB\colours.cfg")
 			Exit
 		EndIf
 	EndIf
@@ -132,7 +132,7 @@ Else
 	Else
 		definepath()
 		_FileWriteToLine(@AppDataDir & "\TranslucentTB\colours.cfg", 3, $installlocation, True, True)
-		MsgBox(BitOR($MB_ICONINFORMATION, $MB_SETFOREGROUND), "Path Updated", "Restart Colours." &@CRLF& "If you believe wrong path has been provided, then delete this file" & @CRLF & @AppDataDir & "\TranslucentTB\colours.cfg")
+		MsgBox(BitOR($MB_ICONINFORMATION, $MB_SETFOREGROUND), "Path Updated", "Restart Colours." &@CRLF& "If you run into issues, then delete this file" & @CRLF & @AppDataDir & "\TranslucentTB\colours.cfg")
 		Exit
 	EndIf
 EndIf
