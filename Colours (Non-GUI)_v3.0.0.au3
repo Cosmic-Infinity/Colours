@@ -4,7 +4,7 @@ TraySetIcon(@ScriptDir & "\assets\ColoursIconNew32.ico")
 #include <GUIConstants.au3>
 
 Global $colour = ""
-Global $installlocation = StringLeft(@WindowsDir, 3) & "Program Files (x86)\TranslucentTB\TranslucentTB.ex"
+Global $installlocation = StringLeft(@WindowsDir, 3) & "Program Files (x86)\TranslucentTB\TranslucentTB.exe"
 
 
 ;---------------path defining window and logic. only applicable when TranslucentTB isn't installed in it's native path---------------
