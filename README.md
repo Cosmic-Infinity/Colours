@@ -1,6 +1,6 @@
 # Colours
 
-Now customise your Windows 10 task bar colours and looks with this little tool.
+Now customise your Windows 10 task bar colours and looks with this little tool. 
 
 😉. Always wanted that clear taskbar? Now you can do it!<br/>
 😏. Wanna go back to Windows 7 like translucency? Yes, yes, that's an option.<br/>
