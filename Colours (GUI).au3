@@ -31,7 +31,7 @@
 #include <GDIPlus.au3> ; ImageProcessing Library
 #include <File.au3> ; temporary file name generation library
 #include <Misc.au3> ; mouse click detection And font styles
-#include <ColorPicker.au3> ; colour picker udf
+#include "assets/ColorPicker.au3" ; colour picker udf
 ;#Include <WinAPI.au3>
 #include <GuiEdit.au3>
 ;#include <StringConstants.au3> ;for string constants
