@@ -11,12 +11,13 @@ Now customise your Windows 10 task bar colours and looks with this little tool.
 
 <br/>
 
+**NOTE:** (07.03.22) Colours is incompatible with newer versions of TranslucentTB. Last known working version is [Version 4 Hotfix 5](https://github.com/TranslucentTB/TranslucentTB/releases/tag/2020.2) It is possible to rework some stuff to get it working, but there's really no incentive for me currently, as I'm the only user LOL.
 
-NOTE : This is just an automation tool and the functionality it provides can be done by hand as well, although, that's time taking and slow.
+This is just an automation tool and the functionality it provides can be done by hand as well, although, that's time taking and slow.
 
 To use it, you'll need :
 
-1. **TranslucentTB** by _Charles Milette_ (https://github.com/TranslucentTB/TranslucentTB/releases/latest)
+1. [**TranslucentTB**](https://github.com/TranslucentTB/TranslucentTB/releases/latest) by _Charles Milette_ 
 
 
 
@@ -77,7 +78,7 @@ Because TranslucentTB has it's limitations.
  
  ## _Compiling it youself_
  Autoit code is relatively easy to compile. All you need is the autoit compiler which comes with the autoit package. You can get autoit from : https://www.autoitscript.com/
- 
+ Once Autoit runtime is installed, you can run the script directly, or compile it.
 1. `Download` the required file from this repository. (either GUI or Non-GUI version)
 2. `Download` and `Install` Autoit
 3. Open `Compile Script to .exe (x64)` (reccomended) or `Compile Script to .exe (x86)`
