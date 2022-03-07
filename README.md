@@ -17,7 +17,7 @@ This is just an automation tool and the functionality it provides can be done by
 
 To use it, you'll need :
 
-1. [**TranslucentTB**](https://github.com/TranslucentTB/TranslucentTB/releases/latest) by _Charles Milette_ 
+1. [**TranslucentTB**](https://github.com/TranslucentTB/TranslucentTB/releases/tag/2020.2) by _Charles Milette_ 
 
 
 
