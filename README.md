@@ -13,7 +13,7 @@ Now customise your Windows task bar colours and looks with this little tool.
 
 **NOTE:** (07.03.22) Colours is incompatible with newer versions of TranslucentTB. Last known working version is [Version 4 Hotfix 5](https://github.com/TranslucentTB/TranslucentTB/releases/tag/2020.2) It is possible to rework some stuff to get it working, but there's really no incentive for me currently, as I'm the only user LOL.
 
-And... It's broken. **Windows 11 Version 22H2 (KB5022913)** update broke TranslucentTB (yes, even the new version). Well, a rewrite was long overdue I guess. 🥲
+**NOTE:** (02.03.23) And... It's broken. **Windows 11 Version 22H2 (KB5022913)** update broke TranslucentTB (yes, even the new version). Well, a rewrite was long overdue I guess. 🥲
 
 This is just an automation tool and the functionality it provides can be done by hand as well, although, that's time taking and slow.
 
